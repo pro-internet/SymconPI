@@ -1,11 +1,11 @@
 {
     "id": "{30aa0d57-1f3f-4592-8534-874baf659f5c}",
-    "name": "SzenenSteuerung",
+    "name": "SzenenSteuerungZeit",
     "type": 3,
     "vendor": "",
     "aliases": 
     [
-        "SzenenSteuerung"
+        "SzenenSteuerungZeit"
     ],
     "parentRequirements": [],
     "childRequirements": [],
