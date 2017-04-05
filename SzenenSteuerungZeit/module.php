@@ -9,6 +9,7 @@ class SzenenSteuerungZeit extends IPSModule {
 		//You cannot use variables here. Just static values.
 		$this->RegisterPropertyInteger("SceneCount", 3);
 		$this->RegisterPropertyBoolean("CycleThrough", true);
+		$this->RegisterPropertyBoolean("Loop", false);
 		
 		if(!IPS_VariableProfileExists("SZS.SceneControl")){
 			IPS_CreateVariableProfile("SZS.SceneControl", 1);
@@ -20,8 +21,8 @@ class SzenenSteuerungZeit extends IPSModule {
 		if(!IPS_VariableProfileExists("SZS.Minutes")){
 			IPS_CreateVariableProfile("SZS.Minutes", 1);
 			IPS_SetVariableProfileValues("SZS.Minutes", 0, 120, 1);
-			IPS_SetVariableProfileText("SZS.Minutes","","min.");
-			//IPS_SetVariableProfileIcon("SZS.SceneControl", "");
+			IPS_SetVariableProfileText("SZS.Minutes",""," Min.");
+			//IPS_SetVariableProfileIcon("SZS.Minutes", "");
 		}
 		if(!IPS_VariableProfileExists("SZS.StartStopButton")){
 			IPS_CreateVariableProfile("SZS.StartStopButton", 1);
@@ -72,8 +73,11 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetVariableCustomProfile($vid, "SZS.StartStopButton");
 			IPS_SetVariableCustomAction($vid,$svid);
 		}
-		if(@IPS_GetObjectIDByIdent("StatusEvent", $this->InstanceID) === false)
+		if(@IPS_GetObjectIDByIdent("StatusEvent", $this->InstanceID) !== false)
 		{
+			$vid = IPS_GetObjectIDByIdent("StatusEvent", $this->InstanceID);
+			IPS_DeleteEvent($vid);
+		}
 			$svid = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
 			$vid = IPS_CreateEvent(0 /* Ausgelößtes Event */);
 			IPS_SetParent($vid, $this->InstanceID);
@@ -122,6 +126,15 @@ else
 	IPS_SetVariableProfileAssociation("SZS.StartStopButton", 1, "Stop", "", -1);
 	
 	//Timer
+	if("'.$this->ReadPropertyBoolean("Loop").'" == "1")
+	{
+		$loop = 1;
+	}
+	else
+	{
+		$loop = 0;
+	}
+	
 	$svid = IPS_GetObjectIDByIdent("Timer1", '. $this->InstanceID .');
 	$vid = IPS_CreateEvent(1 /* zyklisch */);
 	IPS_SetParent($vid, '. $this->InstanceID .');
@@ -136,6 +149,7 @@ else
 IPS_SetEventActive($vid,false);
 IPS_Sleep(100);
 
+\$loop = $loop;
 \$x = IPS_GetObject($vid)[\"ObjectPosition\"] / 2 + 0.5;
 if(@IPS_GetObjectIDByIdent(\"Scene\".\$x, '. $this->InstanceID .') !== false)
 {
@@ -155,6 +169,29 @@ if(@IPS_GetObjectIDByIdent(\"Scene\".\$x, '. $this->InstanceID .') !== false)
 
 	\$svid = IPS_GetObjectIDByIdent(\"Timer\". \$x, '. $this->InstanceID .');
 	IPS_SetPosition($vid, IPS_GetObject($vid)[\"ObjectPosition\"] + 2);
+	IPS_SetEventCyclicTimeBounds($vid,time()+1+GetValue(\$svid)*60,time()+1+GetValue(\$svid)*60);
+	IPS_Sleep(100);
+	IPS_SetEventActive($vid,true);
+}
+else if(\$loop == 1)
+{
+	
+	\$data = wddx_deserialize(GetValue(IPS_GetObjectIDByIdent(\"Scene1Data\", '. $this->InstanceID .')));
+	\$svid = IPS_GetObjectIDByIdent(\"SetValueScript\", '. $this->InstanceID .');
+		
+	if(\$data != NULL) {
+		foreach(\$data as \$id => \$value) {
+			if (IPS_VariableExists(\$id)){
+					\$actionID = \$svid;
+					echo IPS_RunScriptWaitEx(\$actionID, Array(\"VARIABLE\" => \$id, \"VALUE\" => \$value, \"SENDER\" => \"WebFront\"));
+			}
+		}
+	} else {
+		echo \"No SceneData for this Scene\";
+	}
+	
+	\$svid = IPS_GetObjectIDByIdent(\"Timer1\",'. $this->InstanceID .');
+	IPS_SetPosition($vid, 3);
 	IPS_SetEventCyclicTimeBounds($vid,time()+1+GetValue(\$svid)*60,time()+1+GetValue(\$svid)*60);
 	IPS_Sleep(100);
 	IPS_SetEventActive($vid,true);
@@ -183,8 +220,7 @@ else
 
 }
 ?>');
-			IPS_SetEventActive($vid, true); 
-		}
+IPS_SetEventActive($vid, true); 
 		// </!!>
 		
 		for($i = 1; $i <= $this->ReadPropertyInteger("SceneCount"); $i++) {

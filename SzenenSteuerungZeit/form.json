@@ -3,6 +3,7 @@
   [
 	{ "type": "Label", "label": "Number of Scenes" },
 	{ "type": "NumberSpinner", "name": "SceneCount", "caption": "Scenes" },
-	{ "type": "CheckBox", "name": "CycleThrough", "caption": "Cycle through Scenes" }
+	{ "type": "CheckBox", "name": "CycleThrough", "caption": "Cycle through Scenes" },
+	{ "type": "CheckBox", "name": "Loop", "caption": "Loop the Cycle" }
   ]
 }
