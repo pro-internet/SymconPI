@@ -43,7 +43,7 @@ class SzenenSteuerungZeit extends IPSModule {
 		
 		$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
 		
-		//SetValue Script <!!>
+		//SetValue Script
 		if(@IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID) === false)
 		{
 			$svid = IPS_CreateScript(0 /* PHP Script */);
