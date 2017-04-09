@@ -1,0 +1,12 @@
+{
+    "translations": {
+        "de": { 
+            "Unit": "Einheit",
+            "Degree (°C)": "Grad (°C)",
+			"Degree (°F)": "Grad (°F)",
+			"Custom": "Sonstige",
+			"Below limit": "Unter dem Limit",
+			"Above limit": "Über dem Limit",
+        }
+    }
+}

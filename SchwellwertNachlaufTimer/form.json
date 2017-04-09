@@ -1,0 +1,28 @@
+{
+  "elements":
+  [
+	{ "type": "Select", "name": "unit", "caption": "Unit",
+	"options": [
+			{ "label": "Degree (°C)", "value": 1 },
+			{ "label": "Degree (°F)", "value": 2 },
+			{ "label": "Lux (lx)", "value": 3 },
+			{ "label": "Custom", "value": 0 },
+		]
+	},
+	{ "type": "SelectVariable", "name": "SensorVariable", "caption": "Sensor" },
+	{ "type": "SelectVariable", "name": "SensorVariable", "caption": "Sensor" },
+	{ "type": "ValidationTextBox", "name": "valueOff", "caption": "Below limit" },
+	{ "type": "ValidationTextBox", "name": "valueOn", "caption": "Above limit" }
+  ],
+  "actions":
+  [
+	{ "type": "Select", "name": "unit", "caption": "Unit",
+	"options": [
+			{ "label": "Degree (°C)", "value": 1 },
+			{ "label": "Degree (°F)", "value": 2 },
+			{ "label": "Lux (lx)", "value": 3 },
+			{ "label": "Custom", "value": 0 },
+		]
+	},
+  ]
+}
