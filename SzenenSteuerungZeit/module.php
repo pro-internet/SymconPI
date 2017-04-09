@@ -246,6 +246,54 @@ else if(\$loop == 1)
 }
 else
 {
+	IPS_SetVariableProfileAssociation(\"SZS.StartStopButton\", 1, \"Start\", \"\", -1);
+	
+	\$targetIDs = IPS_GetObjectIDByIdent(\"Targets\", '. $this->InstanceID .');
+	
+	//set all targets to 0 or false
+	foreach(IPS_GetChildrenIDs(\$targetIDs) as \$TargetID) {
+		//only allow links
+		if(IPS_LinkExists(\$TargetID)) {
+			\$linkVariableID = IPS_GetLink(\$TargetID)[\'TargetID\'];
+			if(IPS_VariableExists(\$linkVariableID)) {
+				\$type = IPS_GetVariable(\$linkVariableID)[\'VariableType\'];
+				\$id = \$linkVariableID;
+				
+				\$o = IPS_GetObject(\$id);
+				\$v = IPS_GetVariable(\$id);
+				
+				if(\$v[\"VariableCustomAction\"] > 0)
+					\$actionID = \$v[\"VariableCustomAction\"];
+				else
+					\$actionID = \$v[\"VariableAction\"];
+				
+				//Skip this device if we do not have a proper id
+					if(\$actionID < 10000)
+						continue;
+					
+				switch(\$type)
+				{
+					case(0):
+						\$value = false; break;
+					case(1):
+						\$value = 0; break;
+					case(2):
+						\$value = 0.0; break;
+					case(3):
+						\$value = \"\"; break;				
+				}
+					
+				if(IPS_InstanceExists(\$actionID)) {
+					IPS_RequestAction(\$actionID, \$o[\"ObjectIdent\"], \$value);
+				}
+				else if(IPS_ScriptExists(\$actionID))
+				{
+					echo IPS_RunScriptWaitEx(\$actionID, Array(\"VARIABLE\" => \$id, \"VALUE\" => \$value));
+				}
+			}
+		}
+	}
+	
 	IPS_DeleteEvent($vid);
 }
 
