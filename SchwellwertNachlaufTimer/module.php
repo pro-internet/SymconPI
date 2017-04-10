@@ -426,6 +426,11 @@ if (\$IPS_SENDER == \"WebFront\")
 						$o = IPS_GetObject($id);
 						$v = IPS_GetVariable($id);
 						
+						if($v['VariableType'] == 0)
+						{
+							$value = (bool) $value;
+						}
+						
 						if($v["VariableCustomAction"] > 0)
 							$actionID = $v["VariableCustomAction"];
 						else
