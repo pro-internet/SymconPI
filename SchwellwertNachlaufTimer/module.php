@@ -298,7 +298,7 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetName($eid, "Nachlaufzeit");
 					IPS_SetParent($eid, $this->InstanceID);
 					IPS_SetIdent($eid, "NachlaufTimer");
-					IPS_SetEventScript($eid, "SWT_nachlaufzeitAbgelaufen(". $this->InstanceID .", $eid);");
+					IPS_SetEventScript($eid, "SWT_nachlaufzeitAbgelaufen(". $this->InstanceID .");");
 				}
 				else
 				{
@@ -307,6 +307,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
 				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit*60 /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
 				IPS_SetEventActive($eid, true);
+				IPS_SetHidden($eid,false);
 				
 				$this->nachlaufzeitAbgelaufen = false;
 			}
@@ -320,10 +321,11 @@ if (\$IPS_SENDER == \"WebFront\")
 			}
         }
 		
-		public function nachlaufzeitAbgelaufen($eid)
+		public function nachlaufzeitAbgelaufen()
 		{
 			$this->nachlaufzeitAbgelaufen = true;
 			$this->refreshStatus();
+			$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
 			IPS_SetHidden($eid,true);
 		}
 		
