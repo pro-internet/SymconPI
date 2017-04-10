@@ -268,7 +268,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			// Logikbereich //
 			//////////////////
 			
-			$tid = $this->RegisterTimer("Update", 300000 /*alle 5 Minuten*/, "SWT_refreshStatus(". $this->InstanceID .");");
+			$tid = $this->RegisterTimer("Update", 3000 /*alle 5 Minuten*/, "SWT_refreshStatus(". $this->InstanceID .");");
         }
  
 		/**
