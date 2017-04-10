@@ -103,6 +103,27 @@ if (\$IPS_SENDER == \"WebFront\")
 			SetValue($vid,1);
 		}
 		
+		//Automatikbutton (ein und ausschalten des moduls)
+		if(@IPS_GetObjectIDByIdent("Automatik",$this->InstanceID) === false)
+		{
+			$svid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
+			$vid = IPS_CreateVariable(0 /* Boolean */);
+			IPS_SetParent($vid, $this->InstanceID);
+			IPS_SetName($vid, "Automatik");
+			IPS_SetIdent($vid, "Automatik");
+			IPS_SetPosition($vid,0);
+			//Profil
+			IPS_CreateVariableProfile("SWT.Automatik",0);
+			IPS_SetVariableProfileValues("SWT.Automatik",0,1,1);
+			IPS_SetVariableProfileAssociation("SWT.Automatik",0,"Aus","",-1);
+			IPS_SetVariableProfileAssociation("SWT.Automatik",1,"An","",0x00FF00);
+			IPS_SetVariableProfileIcon("SWT.Automatik","Keyboard");
+			IPS_SetVariableCustomProfile($vid,"SWT.Automatik");
+			
+			IPS_SetVariableCustomAction($vid,$svid);
+			SetValue($vid,false);
+		}
+		
 		//Targets Kategorie erstellen
 		$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
     }
@@ -285,44 +306,48 @@ if (\$IPS_SENDER == \"WebFront\")
  
         public function refreshStatus() 
 		{
-            $sid = $this->ReadPropertyInteger("Sensor");
-			$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
-			$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
-			$ntID = IPS_GetObjectIDByIdent("NachlaufzeitVariable", $this->InstanceID);
-			
-			$sensor = GetValue($sid);	$limit = GetValue($lid);	$nachlaufzeit = GetValue($ntID);
-			if($nachlaufzeit < 1) { $nachlaufzeit = 0.05; }
-			if($limit < $sensor) //Above limit
+			$automatik = GetValue(IPS_GetObjectIDByIdent("Automatik",$this->InstanceID));
+			if($automatik)
 			{
-				$_IPS['SELF'] = "WebFront";
-				SetValue($statusID,1);	
-
-				if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) === false)
-				{
-					$eid = IPS_CreateEvent(1 /*züklisch*/);
-					IPS_SetName($eid, "Timer");
-					IPS_SetParent($eid, $this->InstanceID);
-					IPS_SetIdent($eid, "NachlaufTimer");
-					IPS_SetPosition($eid, 3);
-					IPS_SetEventScript($eid, "SWT_nachlaufzeitAbgelaufen(". $this->InstanceID .");");
-				}
-				else
-				{
-					$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
-				}
-				IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
-				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit*60 /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
-				IPS_SetEventActive($eid, true);
-				IPS_SetHidden($eid,false);
+				$sid = $this->ReadPropertyInteger("Sensor");
+				$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
+				$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
+				$ntID = IPS_GetObjectIDByIdent("NachlaufzeitVariable", $this->InstanceID);
 				
-				$this->nachlaufzeitAbgelaufen = false;
-			}
-			else //Below limit
-			{
-				if($this->nachlaufzeitAbgelaufen == true)
+				$sensor = GetValue($sid);	$limit = GetValue($lid);	$nachlaufzeit = GetValue($ntID);
+				if($nachlaufzeit < 1) { $nachlaufzeit = 0.05; }
+				if($limit < $sensor) //Above limit
 				{
 					$_IPS['SELF'] = "WebFront";
-					SetValue($statusID,0);
+					SetValue($statusID,1);	
+
+					if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) === false)
+					{
+						$eid = IPS_CreateEvent(1 /*züklisch*/);
+						IPS_SetName($eid, "Timer");
+						IPS_SetParent($eid, $this->InstanceID);
+						IPS_SetIdent($eid, "NachlaufTimer");
+						IPS_SetPosition($eid, 3);
+						IPS_SetEventScript($eid, "SWT_nachlaufzeitAbgelaufen(". $this->InstanceID .");");
+					}
+					else
+					{
+						$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
+					}
+					IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
+					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit*60 /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
+					IPS_SetEventActive($eid, true);
+					IPS_SetHidden($eid,false);
+					
+					$this->nachlaufzeitAbgelaufen = false;
+				}
+				else //Below limit
+				{
+					if($this->nachlaufzeitAbgelaufen == true)
+					{
+						$_IPS['SELF'] = "WebFront";
+						SetValue($statusID,0);
+					}
 				}
 			}
         }
