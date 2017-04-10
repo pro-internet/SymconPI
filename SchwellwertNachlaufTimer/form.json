@@ -1,8 +1,13 @@
 {
   "elements":
   [
+	{ "type": "Label", "label": "Überwachtes Objekt" },
 	{ "type": "SelectVariable", "name": "Sensor", "caption": "Sensor" },
-	{ "type": "Select", "name": "Unit", "caption": "Profil des \nSchwellwerts",
+	{ "type": "Label", "label": "Schwellwert Über- (An) / Unterschreitung (Aus)" },
+	{ "type": "ValidationTextBox", "name": "valueOn", "caption": "An" },
+	{ "type": "ValidationTextBox", "name": "valueOff", "caption": "Aus" },
+	{ "type": "Label", "label": "Schwellwert" },
+	{ "type": "Select", "name": "Unit", "caption": "Profil",
 	"options": [
 			{ "label": "Grad (°C)", "value": "1" },
 			{ "label": "Grad (°F)", "value": "2" },
@@ -11,10 +16,7 @@
 			{ "label": "Benutzerdefiniert", "value": "0" },
 		]
 	},
-	{ "type": "Label", "label": "Zu setzender Wert für die Zielvariable" },
-	{ "type": "ValidationTextBox", "name": "valueOn", "caption": "An" },
-	{ "type": "ValidationTextBox", "name": "valueOff", "caption": "Aus" },
-	{ "type": "Label", "label": "Benutzerdefiniertes Profil" },
+	{ "type": "Label", "label": "Schwellwert Benutzerdefiniert" },
 	{ "type": "Select", "name": "Type", "caption": "Variablentyp",
 	"options": [
 			{ "label": "Boolean", "value": 0 },
@@ -23,10 +25,10 @@
 			{ "label": "String", "value": 3 }
 		]
 	},
-	{ "type": "ValidationTextBox", "name": "prefix", "caption": "Prefix" },
-	{ "type": "ValidationTextBox", "name": "suffix", "caption": "Suffix" },
 	{ "type": "ValidationTextBox", "name": "min", "caption": "Minimalwert" },
 	{ "type": "ValidationTextBox", "name": "max", "caption": "Maximalwert" },
-	{ "type": "ValidationTextBox", "name": "steps", "caption": "Schrittweite" }
+	{ "type": "ValidationTextBox", "name": "steps", "caption": "Schrittweite" },
+	{ "type": "ValidationTextBox", "name": "prefix", "caption": "Prefix" },
+	{ "type": "ValidationTextBox", "name": "suffix", "caption": "Suffix" }
   ]
 }
