@@ -45,6 +45,44 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetParent($vid, $this->InstanceID);
 			IPS_SetName($vid, "Status");
 			IPS_SetIdent($vid, "StatusVariable");
+			if(IPS_VariableProfileExists("~Switch"))
+			{
+				IPS_SetVariableCustomProfile($vid,"~Switch");
+			}
+			else
+			{
+				IPS_CreateVariableProfile("~Switch",0);
+				IPS_SetVariableProfileValues("~Switch",0,1,1);
+				IPS_SetVariableProfileAssociation("~Switch",0,"Aus","",-1);
+				IPS_SetVariableProfileAssociation("~Switch",1,"An","",0x00FF00);
+				IPS_SetVariableProfileIcon("~Switch","Power");
+				
+				IPS_SetVariableCustomProfile($vid,"~Switch");
+			}
+			IPS_SetVariableCustomAction($vid,$svid);
+		}
+		
+		//Nachlaufzeit Variable erstellen
+		if(@IPS_GetObjectIDByIdent("Nachlaufzeit",$this->InstanceID) === false)
+		{
+			$svid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
+			$vid = IPS_CreateVariable(1 /* Integer */);
+			IPS_SetParent($vid, $this->InstanceID);
+			IPS_SetName($vid, "Nachlaufzeit");
+			IPS_SetIdent($vid, "Nachlaufzeit");
+			if(IPS_VariableProfileExists("SZS.Minutes"))
+			{
+				IPS_SetVariableCustomProfile($vid,"SZS.Minutes");
+			}
+			else
+			{
+				IPS_CreateVariableProfile("SZS.Minutes", 1);
+				IPS_SetVariableProfileValues("SZS.Minutes", 0, 120, 1);
+				IPS_SetVariableProfileText("SZS.Minutes",""," Min.");
+				//IPS_SetVariableProfileIcon("SZS.Minutes", "");
+				
+				IPS_SetVariableCustomProfile($vid,"SZS.Minutes");
+			}
 			IPS_SetVariableCustomAction($vid,$svid);
 		}
 		
@@ -84,6 +122,9 @@ if (\$IPS_SENDER == \"WebFront\")
             // Diese Zeile nicht löschen
             parent::ApplyChanges();
 			
+			///////////////////
+			// Profilbereich //
+			///////////////////
 			switch($this->ReadPropertyInteger("Unit"))
 			{
 				case(1 /*°C*/):
@@ -209,18 +250,94 @@ if (\$IPS_SENDER == \"WebFront\")
 						echo 'Caught exception: ',  $e->getMessage(), "\n";
 					}
 			}
+			//////////////////
+			// Logikbereich //
+			//////////////////
+			
+			$tid = $this->RegisterTimer("Update", 300000 /*alle 5 Minuten*/, "SWT_refreshStatus(0);");
         }
  
-        /**
+		/**
         * Die folgenden Funktionen stehen automatisch zur Verfügung, wenn das Modul über die "Module Control" eingefügt wurden.
         * Die Funktionen werden, mit dem selbst eingerichteten Prefix, in PHP und JSON-RPC wiefolgt zur Verfügung gestellt:
         *
         * ABC_MeineErsteEigeneFunktion($id);
         *
         */
-        public function MeineErsteEigeneFunktion() {
-            // Selbsterstellter Code
+ 
+        public function refreshStatus() 
+		{
+            $sid = $this->ReadPropertyInteger("Sensor");
+			$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
+			$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
+			$ntID = IPS_GetObjectIDByIdent("Nachlaufzeit", $this->InstanceID);
+			
+			$sensor = GetValue($sid);	$limit = GetValue($lid);	$nachlaufzeit = GetValue($ntID);
+			if($limit < $sensor) //Above limit
+			{
+				SetValue($statusID,1);	
+				$tid = $this->RegisterTimer("Nachlaufzeit", $nachlaufzeit*60000 /*Minuten zu Millisekunden*/, "SWT_nachlaufzeitAbgelaufen(0)");
+				$this->RegisterPropertyInteger("nachlauftimer", $tid);
+			}
+			else //Below limit
+			{
+				SetValue($statusID,0);
+			}
         }
+		
+		public function nachlaufzeitAbgelaufen()
+		{
+			$tid = $this->ReadPropertyInteger("nachlauftimer");
+			IPS_SetEventActive($tid,false);
+		}
+		
+		public function statusOnChange($status)
+		{
+			$targets = IPS_GetObjectIDByIdent("Targets");
+			if($status == "On")
+			{
+				$value = $this->ReadPropertyInteger("valueOn");
+			}
+			else
+			{
+				$value = $this->ReadPropertyInteger("valueOff");
+			}
+			
+			foreach(IPS_GetChildrenIDs($targets) as $target) 
+			{
+				//only allow links
+				if(IPS_LinkExists($TargetID)) 
+				{
+					$linkVariableID = IPS_GetLink($TargetID)['TargetID'];
+					if(IPS_VariableExists($linkVariableID)) 
+					{
+						$type = IPS_GetVariable($linkVariableID)['VariableType'];
+						$id = $linkVariableID;
+						
+						$o = IPS_GetObject($id);
+						$v = IPS_GetVariable($id);
+						
+						if($v["VariableCustomAction"] > 0)
+							$actionID = $v["VariableCustomAction"];
+						else
+							$actionID = $v["VariableAction"];
+						
+						//Skip this device if we do not have a proper id
+							if($actionID < 10000)
+								continue;
+							
+						if(IPS_InstanceExists($actionID)) 
+						{
+							IPS_RequestAction($actionID, $o["ObjectIdent"], $value);
+						}
+						else if(IPS_ScriptExists($actionID))
+						{
+							echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value));
+						}
+					}
+				}
+			}
+		}
 		
 		private function CreateCategoryByIdent($id, $ident, $name) 
 		{
