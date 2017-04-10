@@ -1,4 +1,4 @@
-# Documentation
+# Kurzbeschreibung
 Modul zum Schalten eines beliebigen Geräts, abhängig von einem Senorwert und einem Schwellwert, unter Verwendung einer Nachlaufzeit.
 
 - Sensor:
