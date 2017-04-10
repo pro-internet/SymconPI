@@ -1,6 +1,8 @@
 <?
 class SchwellwertTimer extends IPSModule {
  
+	private $nachlaufzeitAbgelaufen = false;
+	
     public function Create() 
 	{
 		// Diese Zeile nicht löschen.
@@ -44,7 +46,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			$vid = IPS_CreateVariable(0 /* Boolean */);
 			IPS_SetParent($vid, $this->InstanceID);
 			IPS_SetName($vid, "Status");
-			IPS_SetIdent($vid, "StatusVariable");
+			IPS_SetIdent($vid, "Status");
 			if(IPS_VariableProfileExists("~Switch"))
 			{
 				IPS_SetVariableCustomProfile($vid,"~Switch");
@@ -62,14 +64,26 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetVariableCustomAction($vid,$svid);
 		}
 		
+		//Status OnChange event
+		if(@IPS_GetObjectIDByIdent("StatusOnChange",$this->InstanceID) === false)
+		{
+			$eid = IPS_CreateEvent(0);
+			IPS_SetEventTrigger($eid,1,$vid);
+			IPS_SetParent($eid,$vid);
+			IPS_SetName($eid,"Status OnChange");
+			IPS_SetIdent($eid,"StatusOnChange");
+			IPS_SetEventActive($eid, true);
+			IPS_SetEventScript($eid, "SWT_statusOnChange(". $this->InstanceID .")");
+		}
+		
 		//Nachlaufzeit Variable erstellen
-		if(@IPS_GetObjectIDByIdent("Nachlaufzeit",$this->InstanceID) === false)
+		if(@IPS_GetObjectIDByIdent("NachlaufzeitVariable",$this->InstanceID) === false)
 		{
 			$svid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 			$vid = IPS_CreateVariable(1 /* Integer */);
 			IPS_SetParent($vid, $this->InstanceID);
 			IPS_SetName($vid, "Nachlaufzeit");
-			IPS_SetIdent($vid, "Nachlaufzeit");
+			IPS_SetIdent($vid, "NachlaufzeitVariable");
 			if(IPS_VariableProfileExists("SZS.Minutes"))
 			{
 				IPS_SetVariableCustomProfile($vid,"SZS.Minutes");
@@ -254,7 +268,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			// Logikbereich //
 			//////////////////
 			
-			$tid = $this->RegisterTimer("Update", 300000 /*alle 5 Minuten*/, "SWT_refreshStatus(0);");
+			$tid = $this->RegisterTimer("Update", 300000 /*alle 5 Minuten*/, "SWT_refreshStatus(". $this->InstanceID .");");
         }
  
 		/**
@@ -270,35 +284,41 @@ if (\$IPS_SENDER == \"WebFront\")
             $sid = $this->ReadPropertyInteger("Sensor");
 			$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
 			$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
-			$ntID = IPS_GetObjectIDByIdent("Nachlaufzeit", $this->InstanceID);
+			$ntID = IPS_GetObjectIDByIdent("NachlaufzeitVariable", $this->InstanceID);
 			
 			$sensor = GetValue($sid);	$limit = GetValue($lid);	$nachlaufzeit = GetValue($ntID);
 			if($limit < $sensor) //Above limit
 			{
 				SetValue($statusID,1);	
-				$tid = $this->RegisterTimer("Nachlaufzeit", $nachlaufzeit*60000 /*Minuten zu Millisekunden*/, "SWT_nachlaufzeitAbgelaufen(0)");
-				$this->RegisterPropertyInteger("nachlauftimer", $tid);
+
+				$this->RegisterTimer("Nachlaufzeit", $nachlaufzeit*60000 /*Minuten zu Millisekunden*/, "SWT_nachlaufzeitAbgelaufen(". $this->InstanceID .");");
+				$this->nachlaufzeitAbgelaufen = false;
 			}
 			else //Below limit
 			{
-				SetValue($statusID,0);
+				if($this->nachlaufzeitAbgelaufen == true)
+				{
+					SetValue($statusID,0);
+				}
 			}
         }
 		
 		public function nachlaufzeitAbgelaufen()
 		{
-			$tid = $this->ReadPropertyInteger("nachlauftimer");
-			IPS_SetEventActive($tid,false);
+			$this->nachlaufzeitAbgelaufen = true;
+			$this->refreshStatus();
 		}
 		
-		public function statusOnChange($status)
+		public function statusOnChange()
 		{
+			$vid = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
+			$status = GetValue($vid);
 			$targets = IPS_GetObjectIDByIdent("Targets");
-			if($status == "On")
+			if($status == 1 /*ON*/)
 			{
 				$value = $this->ReadPropertyInteger("valueOn");
 			}
-			else
+			else /*OFF*/
 			{
 				$value = $this->ReadPropertyInteger("valueOff");
 			}
