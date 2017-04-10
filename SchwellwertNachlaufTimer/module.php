@@ -113,11 +113,14 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetIdent($vid, "Automatik");
 			IPS_SetPosition($vid,0);
 			//Profil
-			IPS_CreateVariableProfile("SWT.Automatik",0);
-			IPS_SetVariableProfileValues("SWT.Automatik",0,1,1);
-			IPS_SetVariableProfileAssociation("SWT.Automatik",0,"Aus","",-1);
-			IPS_SetVariableProfileAssociation("SWT.Automatik",1,"An","",0x00FF00);
-			IPS_SetVariableProfileIcon("SWT.Automatik","Keyboard");
+			if(!IPS_VariableProfileExists("SWT.Automatik"))
+			{
+				IPS_CreateVariableProfile("SWT.Automatik",0);
+				IPS_SetVariableProfileValues("SWT.Automatik",0,1,1);
+				IPS_SetVariableProfileAssociation("SWT.Automatik",0,"Aus","",-1);
+				IPS_SetVariableProfileAssociation("SWT.Automatik",1,"An","",0x00FF00);
+				IPS_SetVariableProfileIcon("SWT.Automatik","Keyboard");
+			}
 			IPS_SetVariableCustomProfile($vid,"SWT.Automatik");
 			
 			IPS_SetVariableCustomAction($vid,$svid);
@@ -133,6 +136,7 @@ if (\$IPS_SENDER == \"WebFront\")
 	{
 		if(@IPS_GetObjectIDByIdent("limit", $this->InstanceID) === false)
 		{
+			//variable
 			$svid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 			$vid = IPS_CreateVariable($type);
 			IPS_SetParent($vid, $this->InstanceID);
@@ -140,6 +144,17 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetIdent($vid, "limit");
 			IPS_SetPosition($vid, 1);
 			IPS_SetVariableCustomAction($vid, $svid);
+			
+			//onchange event
+			$eid = IPS_CreateEvent(0 /* ausgelößt */);
+			IPS_SetEventTrigger($eid,1,$vid);
+			IPS_SetEventScript($eid,"SWT_refreshStatus(". $this->InstanceID .");");
+			IPS_SetIdent($eid,"onChangeSchwell");
+			IPS_SetName($eid,"onChange Schwellwert");
+			IPS_SetParent($eid, $this->InstanceID);
+			IPS_SetHidden($eid,true);
+			IPS_SetEventActive($eid, true);
+			
 			return $vid;
 		}
 		else
@@ -147,6 +162,11 @@ if (\$IPS_SENDER == \"WebFront\")
 			$vid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
 			if(IPS_GetVariable($vid)['VariableType'] != $type)
 			{
+				if(@IPS_GetObjectIDByIdent("onChangeSchwell", $this->InstanceID !== false))
+				{
+					$eid = IPS_GetObjectIDByIdent("onChangeSchwell",$this->InstanceID);
+					IPS_DeleteEvent($eid);
+				}
 				IPS_DeleteVariable($vid);
 				$vid = $this->CreateLimitVariable($type);
 				return $vid;
@@ -160,6 +180,24 @@ if (\$IPS_SENDER == \"WebFront\")
 		{
             // Diese Zeile nicht löschen
             parent::ApplyChanges();
+			
+			//onchange event Sensor
+			if(@IPS_GetObjectIDByIdent("onChangeSensor",$this->InstanceID) === false)
+			{
+				$vid = $this->ReadPropertyInteger("Sensor");
+				if($vid >= 10000)
+				{
+					$eid = IPS_CreateEvent(0 /* ausgelößt */);
+					IPS_SetEventTrigger($eid,1,$vid);
+					IPS_SetEventScript($eid,"SWT_refreshStatus(". $this->InstanceID .");");
+					IPS_SetIdent($eid,"onChangeSensor");
+					IPS_SetName($eid,"onChange Sensor");
+					IPS_SetParent($eid, $this->InstanceID);
+					IPS_SetHidden($eid,true);
+					IPS_SetEventActive($eid, true);
+				}
+			}
+			
 			
 			///////////////////
 			// Profilbereich //
@@ -293,7 +331,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			// Logikbereich //
 			//////////////////
 			
-			$tid = $this->RegisterTimer("Update", 1000 /*jede sekunde*/, "SWT_refreshStatus(". $this->InstanceID .");");
+			//$tid = $this->RegisterTimer("Update", 1000 /*jede sekunde*/, "SWT_refreshStatus(". $this->InstanceID .");");
         }
  
 		/**
