@@ -47,6 +47,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetParent($vid, $this->InstanceID);
 			IPS_SetName($vid, "Status");
 			IPS_SetIdent($vid, "Status");
+			IPS_SetPosition($vid,0);
 			if(IPS_VariableProfileExists("~Switch"))
 			{
 				IPS_SetVariableCustomProfile($vid,"~Switch");
@@ -84,6 +85,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetParent($vid, $this->InstanceID);
 			IPS_SetName($vid, "Nachlaufzeit");
 			IPS_SetIdent($vid, "NachlaufzeitVariable");
+			IPS_SetPosition($vid, 2);
 			if(IPS_VariableProfileExists("SZS.Minutes"))
 			{
 				IPS_SetVariableCustomProfile($vid,"SZS.Minutes");
@@ -98,6 +100,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				IPS_SetVariableCustomProfile($vid,"SZS.Minutes");
 			}
 			IPS_SetVariableCustomAction($vid,$svid);
+			SetValue($vid,1);
 		}
 		
 		//Targets Kategorie erstellen
@@ -114,6 +117,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetParent($vid, $this->InstanceID);
 			IPS_SetName($vid, "Schwellwert");
 			IPS_SetIdent($vid, "limit");
+			IPS_SetPosition($vid, 1);
 			IPS_SetVariableCustomAction($vid, $svid);
 			return $vid;
 		}
@@ -268,7 +272,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			// Logikbereich //
 			//////////////////
 			
-			$tid = $this->RegisterTimer("Update", 3000 /*alle 5 Minuten*/, "SWT_refreshStatus(". $this->InstanceID .");");
+			$tid = $this->RegisterTimer("Update", 1000 /*jede sekunde*/, "SWT_refreshStatus(". $this->InstanceID .");");
         }
  
 		/**
@@ -287,6 +291,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			$ntID = IPS_GetObjectIDByIdent("NachlaufzeitVariable", $this->InstanceID);
 			
 			$sensor = GetValue($sid);	$limit = GetValue($lid);	$nachlaufzeit = GetValue($ntID);
+			if($nachlaufzeit < 1) { $nachlaufzeit = 0.05; }
 			if($limit < $sensor) //Above limit
 			{
 				$_IPS['SELF'] = "WebFront";
@@ -295,9 +300,10 @@ if (\$IPS_SENDER == \"WebFront\")
 				if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) === false)
 				{
 					$eid = IPS_CreateEvent(1 /*züklisch*/);
-					IPS_SetName($eid, "Nachlaufzeit");
+					IPS_SetName($eid, "Timer");
 					IPS_SetParent($eid, $this->InstanceID);
 					IPS_SetIdent($eid, "NachlaufTimer");
+					IPS_SetPosition($eid, 3);
 					IPS_SetEventScript($eid, "SWT_nachlaufzeitAbgelaufen(". $this->InstanceID .");");
 				}
 				else

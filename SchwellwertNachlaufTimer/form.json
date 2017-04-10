@@ -1,20 +1,21 @@
 {
   "elements":
   [
-	{ "type": "Select", "name": "Unit", "caption": "Unit",
+	{ "type": "SelectVariable", "name": "Sensor", "caption": "Sensor" },
+	{ "type": "Select", "name": "Unit", "caption": "Profil des \nSchwellwerts",
 	"options": [
-			{ "label": "Degree (°C)", "value": "1" },
-			{ "label": "Degree (°F)", "value": "2" },
+			{ "label": "Grad (°C)", "value": "1" },
+			{ "label": "Grad (°F)", "value": "2" },
 			{ "label": "Lux (lx)", "value": "3" },
-			{ "label": "Same as Sensor", "value": "4" },
-			{ "label": "Custom", "value": "0" },
+			{ "label": "Profil des Sensors verwenden", "value": "4" },
+			{ "label": "Benutzerdefiniert", "value": "0" },
 		]
 	},
-	{ "type": "SelectVariable", "name": "Sensor", "caption": "Sensor" },
-	{ "type": "ValidationTextBox", "name": "valueOff", "caption": "Below limit" },
-	{ "type": "ValidationTextBox", "name": "valueOn", "caption": "Above limit" },
-	{ "type": "Label", "label": "Custom Unit" },
-	{ "type": "Select", "name": "Type", "caption": "Type",
+	{ "type": "Label", "label": "Zu setzender Wert für die Zielvariable" },
+	{ "type": "ValidationTextBox", "name": "valueOn", "caption": "An" },
+	{ "type": "ValidationTextBox", "name": "valueOff", "caption": "Aus" },
+	{ "type": "Label", "label": "Benutzerdefiniertes Profil" },
+	{ "type": "Select", "name": "Type", "caption": "Variablentyp",
 	"options": [
 			{ "label": "Boolean", "value": 0 },
 			{ "label": "Integer", "value": 1 },
@@ -24,8 +25,8 @@
 	},
 	{ "type": "ValidationTextBox", "name": "prefix", "caption": "Prefix" },
 	{ "type": "ValidationTextBox", "name": "suffix", "caption": "Suffix" },
-	{ "type": "ValidationTextBox", "name": "min", "caption": "Minimum Value" },
-	{ "type": "ValidationTextBox", "name": "max", "caption": "Maximum Value" },
-	{ "type": "ValidationTextBox", "name": "steps", "caption": "Increment Size" }
+	{ "type": "ValidationTextBox", "name": "min", "caption": "Minimalwert" },
+	{ "type": "ValidationTextBox", "name": "max", "caption": "Maximalwert" },
+	{ "type": "ValidationTextBox", "name": "steps", "caption": "Schrittweite" }
   ]
 }
