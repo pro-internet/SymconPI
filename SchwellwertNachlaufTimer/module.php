@@ -73,7 +73,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetName($eid,"Status OnChange");
 			IPS_SetIdent($eid,"StatusOnChange");
 			IPS_SetEventActive($eid, true);
-			IPS_SetEventScript($eid, "SWT_statusOnChange(". $this->InstanceID .")");
+			IPS_SetEventScript($eid, "SWT_statusOnChange(". $this->InstanceID .");");
 		}
 		
 		//Nachlaufzeit Variable erstellen
@@ -289,32 +289,50 @@ if (\$IPS_SENDER == \"WebFront\")
 			$sensor = GetValue($sid);	$limit = GetValue($lid);	$nachlaufzeit = GetValue($ntID);
 			if($limit < $sensor) //Above limit
 			{
+				$_IPS['SELF'] = "WebFront";
 				SetValue($statusID,1);	
 
-				$this->RegisterTimer("Nachlaufzeit", $nachlaufzeit*60000 /*Minuten zu Millisekunden*/, "SWT_nachlaufzeitAbgelaufen(". $this->InstanceID .");");
+				if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) === false)
+				{
+					$eid = IPS_CreateEvent(1 /*züklisch*/);
+					IPS_SetName($eid, "Nachlaufzeit");
+					IPS_SetParent($eid, $this->InstanceID);
+					IPS_SetIdent($eid, "NachlaufTimer");
+					IPS_SetEventScript($eid, "SWT_nachlaufzeitAbgelaufen(". $this->InstanceID .", $eid);");
+				}
+				else
+				{
+					$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
+				}
+				IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
+				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit*60 /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
+				IPS_SetEventActive($eid, true);
+				
 				$this->nachlaufzeitAbgelaufen = false;
 			}
 			else //Below limit
 			{
 				if($this->nachlaufzeitAbgelaufen == true)
 				{
+					$_IPS['SELF'] = "WebFront";
 					SetValue($statusID,0);
 				}
 			}
         }
 		
-		public function nachlaufzeitAbgelaufen()
+		public function nachlaufzeitAbgelaufen($eid)
 		{
 			$this->nachlaufzeitAbgelaufen = true;
 			$this->refreshStatus();
+			IPS_SetHidden($eid,true);
 		}
 		
 		public function statusOnChange()
 		{
 			$vid = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
 			$status = GetValue($vid);
-			$targets = IPS_GetObjectIDByIdent("Targets");
-			if($status == 1 /*ON*/)
+			$targets = IPS_GetObjectIDByIdent("Targets",$this->InstanceID);
+			if($status === true /*ON*/)
 			{
 				$value = $this->ReadPropertyInteger("valueOn");
 			}
@@ -326,9 +344,9 @@ if (\$IPS_SENDER == \"WebFront\")
 			foreach(IPS_GetChildrenIDs($targets) as $target) 
 			{
 				//only allow links
-				if(IPS_LinkExists($TargetID)) 
+				if(IPS_LinkExists($target)) 
 				{
-					$linkVariableID = IPS_GetLink($TargetID)['TargetID'];
+					$linkVariableID = IPS_GetLink($target)['TargetID'];
 					if(IPS_VariableExists($linkVariableID)) 
 					{
 						$type = IPS_GetVariable($linkVariableID)['VariableType'];
@@ -352,7 +370,7 @@ if (\$IPS_SENDER == \"WebFront\")
 						}
 						else if(IPS_ScriptExists($actionID))
 						{
-							echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value));
+							echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value, "SENDER" => "WebFront"));
 						}
 					}
 				}
