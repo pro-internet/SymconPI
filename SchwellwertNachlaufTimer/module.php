@@ -103,6 +103,18 @@ if (\$IPS_SENDER == \"WebFront\")
 			SetValue($vid,1);
 		}
 		
+		//Nachlaufzeit OnChange
+		if(@IPS_GetObjectIDByIdent("NachlaufzeitOnChange",$this->InstanceID) === false)
+		{
+			$eid = IPS_CreateEvent(0);
+			IPS_SetEventTrigger($eid,1,$vid);
+			IPS_SetParent($eid,$vid);
+			IPS_SetName($eid,"Nachlaufzeit OnChange");
+			IPS_SetIdent($eid,"NachlaufzeitOnChange");
+			IPS_SetEventActive($eid, true);
+			IPS_SetEventScript($eid, "SWT_refreshStatus(". $this->InstanceID .");");
+		}
+		
 		//Automatikbutton (ein und ausschalten des moduls)
 		if(@IPS_GetObjectIDByIdent("Automatik",$this->InstanceID) === false)
 		{
@@ -145,16 +157,34 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetPosition($vid, 1);
 			IPS_SetVariableCustomAction($vid, $svid);
 			
-			//onchange event
-			$eid = IPS_CreateEvent(0 /* ausgelößt */);
-			IPS_SetEventTrigger($eid,1,$vid);
-			IPS_SetEventScript($eid,"SWT_refreshStatus(". $this->InstanceID .");");
-			IPS_SetIdent($eid,"onChangeSchwell");
-			IPS_SetName($eid,"onChange Schwellwert");
-			IPS_SetParent($eid, $this->InstanceID);
-			IPS_SetHidden($eid,true);
-			IPS_SetEventActive($eid, true);
+			if(@IPS_GetObjectIDByIdent("onChangeSchwell", $this->InstanceID) === false)
+			{
+				//onchange event
+				$eid = IPS_CreateEvent(0 /* ausgelößt */);
+				IPS_SetEventTrigger($eid,1,$vid);
+				IPS_SetEventScript($eid,"SWT_refreshStatus(". $this->InstanceID .");");
+				IPS_SetIdent($eid,"onChangeSchwell");
+				IPS_SetName($eid,"onChange Schwellwert");
+				IPS_SetParent($eid, $this->InstanceID);
+				IPS_SetHidden($eid,true);
+				IPS_SetEventActive($eid, true);
+			}
+			else
+			{
+				$eid = IPS_GetObjectIDByIdent("onChangeSchwell", $this->InstanceID);
+				IPS_DeleteEvent($eid);
+				//onchange event
+				$eid = IPS_CreateEvent(0 /* ausgelößt */);
+				IPS_SetEventTrigger($eid,1,$vid);
+				IPS_SetEventScript($eid,"SWT_refreshStatus(". $this->InstanceID .");");
+				IPS_SetIdent($eid,"onChangeSchwell");
+				IPS_SetName($eid,"onChange Schwellwert");
+				IPS_SetParent($eid, $this->InstanceID);
+				IPS_SetHidden($eid,true);
+				IPS_SetEventActive($eid, true);
+			}
 			
+
 			return $vid;
 		}
 		else
@@ -240,7 +270,7 @@ if (\$IPS_SENDER == \"WebFront\")
 					}
 					IPS_SetVariableCustomProfile($vid, "SWT.Lux");
 					break;
-				case(4):
+				case(4 /*same as sensor*/):
 					$sensorID = $this->ReadPropertyInteger("Sensor");
 					// Uberprüft die validität der Variable
 					if($sensorID >= 10000)
@@ -307,6 +337,18 @@ if (\$IPS_SENDER == \"WebFront\")
 					//IPS_SetVariableProfileIcon("SWT.Custom", "");
 					
 					IPS_SetVariableCustomProfile($vid, "SWT.Custom");
+					break;
+				case(5 /*Watt*/):
+					$vid = $this->CreateLimitVariable(1 /* integer */);
+				
+					if(!IPS_VariableProfileExists("SWT.Watt"))
+					{
+					IPS_CreateVariableProfile("SWT.Watt", 1);
+					IPS_SetVariableProfileValues("SWT.Watt", 0, 12000, 100);
+					IPS_SetVariableProfileText("SWT.Watt", "", "W");
+					//IPS_SetVariableProfileIcon("SWT.Watt", "");
+					}
+					IPS_SetVariableCustomProfile($vid, "SWT.Watt");
 					break;
 				default:
 					$unit = $this->ReadPropertyInteger("Unit");
@@ -438,8 +480,10 @@ if (\$IPS_SENDER == \"WebFront\")
 						
 						//Skip this device if we do not have a proper id
 							if($actionID < 10000)
+							{
+								SetValue($id,$value);
 								continue;
-							
+							}
 						if(IPS_InstanceExists($actionID)) 
 						{
 							IPS_RequestAction($actionID, $o["ObjectIdent"], $value);

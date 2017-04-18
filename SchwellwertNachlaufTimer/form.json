@@ -12,6 +12,7 @@
 			{ "label": "Grad (°C)", "value": "1" },
 			{ "label": "Grad (°F)", "value": "2" },
 			{ "label": "Lux (lx)", "value": "3" },
+			{ "label": "Watt (W)", "value": "5" },
 			{ "label": "Profil des Sensors verwenden", "value": "4" },
 			{ "label": "Benutzerdefiniert", "value": "0" },
 		]
