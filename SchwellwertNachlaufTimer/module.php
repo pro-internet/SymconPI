@@ -445,6 +445,22 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetHidden($eid,false);
 				}	
 			}
+			else
+			{
+				$ntVarChanged = IPS_GetVariable($ntID)['VariableChanged'];
+				$time = time();
+				if($ntVarChanged < $time + 2 && $ntVarChanged > $time - 2)
+				{
+					if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) !== false)
+					{
+						$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
+						IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
+						IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit*60 + $delay /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
+						IPS_SetEventActive($eid, true);
+						IPS_SetHidden($eid,false);
+					}
+				}
+			}
 		}
 		
         public function refreshStatus() 
