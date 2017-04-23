@@ -56,7 +56,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			else
 			{
 				IPS_CreateVariableProfile("SWT.Seconds", 1);
-				IPS_SetVariableProfileValues("SWT.Seconds", 0, 1000, 1);
+				IPS_SetVariableProfileValues("SWT.Seconds", 0, 86400, 1);
 				IPS_SetVariableProfileText("SWT.Seconds",""," Sek.");
 				//IPS_SetVariableProfileIcon("SWT.Seconds", "");
 				
@@ -120,7 +120,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			else
 			{
 				IPS_CreateVariableProfile("SWT.Seconds", 1);
-				IPS_SetVariableProfileValues("SWT.Seconds", 0, 1000, 1);
+				IPS_SetVariableProfileValues("SWT.Seconds", 0, 86400, 1);
 				IPS_SetVariableProfileText("SWT.Seconds",""," Min.");
 				//IPS_SetVariableProfileIcon("SWT.Seconds", "");
 				
@@ -440,7 +440,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				{
 					$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
 					IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
-					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit*60 + $delay /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
+					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit + $delay /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
 					IPS_SetEventActive($eid, true);
 					IPS_SetHidden($eid,false);
 				}	
@@ -455,7 +455,7 @@ if (\$IPS_SENDER == \"WebFront\")
 					{
 						$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
 						IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
-						IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit*60 + $delay /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
+						IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit + $delay /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
 						IPS_SetEventActive($eid, true);
 						IPS_SetHidden($eid,false);
 					}
@@ -500,7 +500,7 @@ if (\$IPS_SENDER == \"WebFront\")
 						$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
 					}
 					IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
-					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit*60 /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
+					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
 					IPS_SetEventActive($eid, true);
 					IPS_SetHidden($eid,false);
 					
