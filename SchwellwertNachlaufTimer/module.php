@@ -447,11 +447,11 @@ if (\$IPS_SENDER == \"WebFront\")
 			$targets = IPS_GetObjectIDByIdent("Targets",$this->InstanceID);
 			if($status === true /*ON*/)
 			{
-				$value = $this->ReadPropertyInteger("valueOn");
+				$value = $this->ReadPropertyString("valueOn");
 			}
 			else /*OFF*/
 			{
-				$value = $this->ReadPropertyInteger("valueOff");
+				$value = $this->ReadPropertyString("valueOff");
 			}
 			
 			foreach(IPS_GetChildrenIDs($targets) as $target) 
