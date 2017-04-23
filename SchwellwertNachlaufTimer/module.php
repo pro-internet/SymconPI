@@ -46,7 +46,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			$svid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 			$vid = IPS_CreateVariable(1 /* Integer */);
 			IPS_SetParent($vid, $this->InstanceID);
-			IPS_SetName($vid, "Schaltverzögerung");
+			IPS_SetName($vid, "Verzögerung");
 			IPS_SetIdent($vid, "DelayVar");
 			IPS_SetPosition($vid,2);
 			if(IPS_VariableProfileExists("SZS.Seconds"))
@@ -110,7 +110,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			$svid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 			$vid = IPS_CreateVariable(1 /* Integer */);
 			IPS_SetParent($vid, $this->InstanceID);
-			IPS_SetName($vid, "Nachlaufzeit");
+			IPS_SetName($vid, "Nachlauf");
 			IPS_SetIdent($vid, "NachlaufzeitVariable");
 			IPS_SetPosition($vid, 2);
 			if(IPS_VariableProfileExists("SZS.Minutes"))
