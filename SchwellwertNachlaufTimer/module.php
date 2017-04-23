@@ -46,9 +46,9 @@ if (\$IPS_SENDER == \"WebFront\")
 			$svid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 			$vid = IPS_CreateVariable(1 /* Integer */);
 			IPS_SetParent($vid, $this->InstanceID);
-			IPS_SetName($vid, "Delay");
+			IPS_SetName($vid, "Schaltverzögerung");
 			IPS_SetIdent($vid, "DelayVar");
-			IPS_SetPosition($vid,0);
+			IPS_SetPosition($vid,2);
 			if(IPS_VariableProfileExists("SZS.Seconds"))
 			{
 				IPS_SetVariableCustomProfile($vid,"SZS.Seconds");
@@ -413,18 +413,32 @@ if (\$IPS_SENDER == \"WebFront\")
         */
 		public function createDelayTimer()
 		{
-			if(@IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID) === false)
+			$sid = $this->ReadPropertyInteger("Sensor");
+			$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
+			$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
+			
+			$sensor = GetValue($sid);	$limit = GetValue($lid);	$nachlaufzeit = GetValue($ntID);
+			if($limit < $sensor) //Above limit
 			{
-				$eid = IPS_CreateEvent(1 /*zyklisch*/);
-				IPS_SetHidden($eid,true);
-				IPS_SetName($eid, "Delay Timer");
-				IPS_SetParent($eid, $this->InstanceID);
-				IPS_SetIdent($eid, "DelayTimer");
-				IPS_SetEventScript($eid, "refreshStatus(". $this->InstanceID .");");
-				IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
-				$delay = IPS_GetObjectIDByIdent("DelayVar", $this->InstanceID);
-				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $delay);
-				IPS_SetEventActive($eid, true);
+				if(@IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID) === false)
+				{
+					$eid = IPS_CreateEvent(1 /*zyklisch*/);
+					IPS_SetHidden($eid,true);
+					IPS_SetName($eid, "Delay Timer");
+					IPS_SetParent($eid, $this->InstanceID);
+					IPS_SetIdent($eid, "DelayTimer");
+					IPS_SetEventScript($eid, "SWT_refreshStatus(". $this->InstanceID .");");
+					IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
+					$delay = GetValue(IPS_GetObjectIDByIdent("DelayVar", $this->InstanceID));
+					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $delay);
+					IPS_SetEventActive($eid, true);
+				}
+				else
+				{
+					$eid = IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID);
+					IPS_DeleteEvent($eid);
+					$this->createDelayTimer();
+				}
 			}
 		}
 		
