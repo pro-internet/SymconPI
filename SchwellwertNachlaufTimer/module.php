@@ -433,12 +433,6 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $delay);
 					IPS_SetEventActive($eid, true);
 				}
-				else
-				{
-					$eid = IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID);
-					IPS_DeleteEvent($eid);
-					$this->createDelayTimer();
-				}
 			}
 		}
 		
