@@ -56,7 +56,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			else
 			{
 				IPS_CreateVariableProfile("SWT.Seconds", 1);
-				IPS_SetVariableProfileValues("SWT.Seconds", 0, 86400, 1);
+				IPS_SetVariableProfileValues("SWT.Seconds", 0, 1000, 1);
 				IPS_SetVariableProfileText("SWT.Seconds",""," Sek.");
 				//IPS_SetVariableProfileIcon("SWT.Seconds", "");
 				
@@ -120,7 +120,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			else
 			{
 				IPS_CreateVariableProfile("SWT.Seconds", 1);
-				IPS_SetVariableProfileValues("SWT.Seconds", 0, 86400, 1);
+				IPS_SetVariableProfileValues("SWT.Seconds", 0, 1000, 1);
 				IPS_SetVariableProfileText("SWT.Seconds",""," Min.");
 				//IPS_SetVariableProfileIcon("SWT.Seconds", "");
 				
