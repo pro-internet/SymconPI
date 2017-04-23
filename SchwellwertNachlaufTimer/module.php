@@ -416,8 +416,10 @@ if (\$IPS_SENDER == \"WebFront\")
 			$sid = $this->ReadPropertyInteger("Sensor");
 			$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
 			$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
+			$ntID = IPS_GetObjectIDByIdent("NachlaufzeitVariable", $this->InstanceID);
 			
 			$sensor = GetValue($sid);	$limit = GetValue($lid);	$nachlaufzeit = GetValue($ntID);
+			if($nachlaufzeit < 1) { $nachlaufzeit = 0.05; }
 			if($limit < $sensor) //Above limit
 			{
 				if(@IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID) === false)
@@ -433,6 +435,15 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $delay);
 					IPS_SetEventActive($eid, true);
 				}
+				
+				if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) !== false)
+				{
+					$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
+					IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
+					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit*60 + $delay /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
+					IPS_SetEventActive($eid, true);
+					IPS_SetHidden($eid,false);
+				}	
 			}
 		}
 		
