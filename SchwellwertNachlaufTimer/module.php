@@ -48,7 +48,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetParent($vid, $this->InstanceID);
 			IPS_SetName($vid, "Verzögerung");
 			IPS_SetIdent($vid, "DelayVar");
-			IPS_SetPosition($vid,2);
+			IPS_SetPosition($vid,3);
 			if(IPS_VariableProfileExists("SZS.Seconds"))
 			{
 				IPS_SetVariableCustomProfile($vid,"SZS.Seconds");
@@ -492,7 +492,7 @@ if (\$IPS_SENDER == \"WebFront\")
 						IPS_SetName($eid, "Timer");
 						IPS_SetParent($eid, $this->InstanceID);
 						IPS_SetIdent($eid, "NachlaufTimer");
-						IPS_SetPosition($eid, 3);
+						IPS_SetPosition($eid, 4);
 						IPS_SetEventScript($eid, "SWT_nachlaufzeitAbgelaufen(". $this->InstanceID .");");
 					}
 					else
