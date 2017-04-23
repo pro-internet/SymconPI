@@ -12,6 +12,7 @@ class SchwellwertTimer extends IPSModule {
 		$this->RegisterPropertyInteger("Sensor", 0);
 		$this->RegisterPropertyString("valueOff", "0");
 		$this->RegisterPropertyString("valueOn", "1");
+		$this->RegisterPropertyInteger("instance", $this->InstanceID);
 		
 		//Custom Unit Einstellungsgrößen
 		$this->RegisterPropertyInteger("Type", 1);
@@ -19,8 +20,8 @@ class SchwellwertTimer extends IPSModule {
 		$this->RegisterPropertyString("suffix", "");
 		$this->RegisterPropertyString("min", "0");
 		$this->RegisterPropertyString("max", "10");
-		$this->RegisterPropertyString("steps", "1");
-
+		$this->RegisterPropertyString("steps", "1");	
+		
 		//SetValueScript erstellen
 		if(@IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID) === false)
 		{
@@ -37,6 +38,32 @@ if (\$IPS_SENDER == \"WebFront\")
 } 
 
 ?>");
+		}
+		
+		//Delay Variable erstellen DelayVar
+		if(@IPS_GetObjectIDByIdent("DelayVar", $this->InstanceID) === false)
+		{
+			$svid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
+			$vid = IPS_CreateVariable(1 /* Integer */);
+			IPS_SetParent($vid, $this->InstanceID);
+			IPS_SetName($vid, "Delay");
+			IPS_SetIdent($vid, "DelayVar");
+			IPS_SetPosition($vid,0);
+			if(IPS_VariableProfileExists("SZS.Seconds"))
+			{
+				IPS_SetVariableCustomProfile($vid,"SZS.Seconds");
+			}
+			else
+			{
+				IPS_CreateVariableProfile("SZS.Seconds", 1);
+				IPS_SetVariableProfileValues("SZS.Seconds", 0, 1200, 1);
+				IPS_SetVariableProfileText("SZS.Seconds",""," Sek.");
+				//IPS_SetVariableProfileIcon("SZS.Seconds", "");
+				
+				IPS_SetVariableCustomProfile($vid,"SZS.Seconds");
+			}
+			IPS_SetVariableCustomAction($vid,$svid);
+			SetValue($vid,1);	
 		}
 		
 		//Status Variable erstellen
@@ -112,7 +139,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetName($eid,"Nachlaufzeit OnChange");
 			IPS_SetIdent($eid,"NachlaufzeitOnChange");
 			IPS_SetEventActive($eid, true);
-			IPS_SetEventScript($eid, "SWT_refreshStatus(". $this->InstanceID .");");
+			IPS_SetEventScript($eid, "SWT_createDelayTimer(". $this->InstanceID .");");
 		}
 		
 		//Automatikbutton (ein und ausschalten des moduls)
@@ -162,7 +189,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				//onchange event
 				$eid = IPS_CreateEvent(0 /* ausgelößt */);
 				IPS_SetEventTrigger($eid,1,$vid);
-				IPS_SetEventScript($eid,"SWT_refreshStatus(". $this->InstanceID .");");
+				IPS_SetEventScript($eid,"SWT_createDelayTimer(". $this->InstanceID .");");
 				IPS_SetIdent($eid,"onChangeSchwell");
 				IPS_SetName($eid,"onChange Schwellwert");
 				IPS_SetParent($eid, $this->InstanceID);
@@ -219,7 +246,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				{
 					$eid = IPS_CreateEvent(0 /* ausgelößt */);
 					IPS_SetEventTrigger($eid,1,$vid);
-					IPS_SetEventScript($eid,"SWT_refreshStatus(". $this->InstanceID .");");
+					IPS_SetEventScript($eid,"SWT_createDelayTimer(". $this->InstanceID .");");
 					IPS_SetIdent($eid,"onChangeSensor");
 					IPS_SetName($eid,"onChange Sensor");
 					IPS_SetParent($eid, $this->InstanceID);
@@ -360,7 +387,8 @@ if (\$IPS_SENDER == \"WebFront\")
 						$error .= "1: Degree (°C)\n";
 						$error .= "2: Degree (°F)\n";
 						$error .= "3: Lux (lx)\n";
-						$error .= "4: Same as Sensor";
+						$error .= "4: Same as Sensor\n";
+						$error .= "5: Watt";
 						throw new Exception($error);
 						
 					}
@@ -383,12 +411,34 @@ if (\$IPS_SENDER == \"WebFront\")
         * ABC_MeineErsteEigeneFunktion($id);
         *
         */
- 
+		public function createDelayTimer()
+		{
+			if(@IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID) === false)
+			{
+				$eid = IPS_CreateEvent(1 /*zyklisch*/);
+				IPS_SetHidden($eid,true);
+				IPS_SetName($eid, "Delay Timer");
+				IPS_SetParent($eid, $this->InstanceID);
+				IPS_SetIdent($eid, "DelayTimer");
+				IPS_SetEventScript($eid, "refreshStatus(". $this->InstanceID .");");
+				IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
+				$delay = IPS_GetObjectIDByIdent("DelayVar", $this->InstanceID);
+				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $delay);
+				IPS_SetEventActive($eid, true);
+			}
+		}
+		
         public function refreshStatus() 
 		{
-			$automatik = GetValue(IPS_GetObjectIDByIdent("Automatik",$this->InstanceID));
+			$instance = $this->ReadPropertyInteger("instance");
+			$automatik = IPS_GetObjectIDByIdent("Automatik",$instance);
+			$automatik = GetValue($automatik);
 			if($automatik)
-			{
+			{	
+				$dtid = IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID);
+				IPS_SetEventActive($dtid,false);
+				IPS_DeleteEvent($dtid);
+				
 				$sid = $this->ReadPropertyInteger("Sensor");
 				$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
 				$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
@@ -430,6 +480,7 @@ if (\$IPS_SENDER == \"WebFront\")
 					}
 				}
 			}
+			return $_IPS['SELF'];
         }
 		
 		public function nachlaufzeitAbgelaufen()
