@@ -49,18 +49,18 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetName($vid, "Verzögerung");
 			IPS_SetIdent($vid, "DelayVar");
 			IPS_SetPosition($vid,3);
-			if(IPS_VariableProfileExists("SZS.Seconds"))
+			if(IPS_VariableProfileExists("SWT.Seconds"))
 			{
-				IPS_SetVariableCustomProfile($vid,"SZS.Seconds");
+				IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
 			}
 			else
 			{
-				IPS_CreateVariableProfile("SZS.Seconds", 1);
-				IPS_SetVariableProfileValues("SZS.Seconds", 0, 1200, 1);
-				IPS_SetVariableProfileText("SZS.Seconds",""," Sek.");
-				//IPS_SetVariableProfileIcon("SZS.Seconds", "");
+				IPS_CreateVariableProfile("SWT.Seconds", 1);
+				IPS_SetVariableProfileValues("SWT.Seconds", 0, 86400, 1);
+				IPS_SetVariableProfileText("SWT.Seconds",""," Sek.");
+				//IPS_SetVariableProfileIcon("SWT.Seconds", "");
 				
-				IPS_SetVariableCustomProfile($vid,"SZS.Seconds");
+				IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
 			}
 			IPS_SetVariableCustomAction($vid,$svid);
 			SetValue($vid,1);	
@@ -113,18 +113,18 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetName($vid, "Nachlauf");
 			IPS_SetIdent($vid, "NachlaufzeitVariable");
 			IPS_SetPosition($vid, 2);
-			if(IPS_VariableProfileExists("SZS.Minutes"))
+			if(IPS_VariableProfileExists("SWT.Seconds"))
 			{
-				IPS_SetVariableCustomProfile($vid,"SZS.Minutes");
+				IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
 			}
 			else
 			{
-				IPS_CreateVariableProfile("SZS.Minutes", 1);
-				IPS_SetVariableProfileValues("SZS.Minutes", 0, 120, 1);
-				IPS_SetVariableProfileText("SZS.Minutes",""," Min.");
-				//IPS_SetVariableProfileIcon("SZS.Minutes", "");
+				IPS_CreateVariableProfile("SWT.Seconds", 1);
+				IPS_SetVariableProfileValues("SWT.Seconds", 0, 86400, 1);
+				IPS_SetVariableProfileText("SWT.Seconds",""," Min.");
+				//IPS_SetVariableProfileIcon("SWT.Seconds", "");
 				
-				IPS_SetVariableCustomProfile($vid,"SZS.Minutes");
+				IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
 			}
 			IPS_SetVariableCustomAction($vid,$svid);
 			SetValue($vid,1);
