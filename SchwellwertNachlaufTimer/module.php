@@ -166,6 +166,20 @@ if (\$IPS_SENDER == \"WebFront\")
 			SetValue($vid,false);
 		}
 		
+		//Automatik OnChange to off event
+		if(@IPS_GetObjectIDByIdent("TriggerOnChange",$this->InstanceID) === false)
+		{
+			$vid = IPS_GetObjectIDByIdent("Automatik",$this->InstanceID);
+			$eid = IPS_CreateEvent(0);
+			IPS_SetEventTrigger($eid,1,$vid);
+			IPS_SetEventTriggerValue($eid,false);
+			IPS_SetParent($eid,$vid);
+			IPS_SetName($eid,"Trigger OnChange");
+			IPS_SetIdent($eid,"TriggerOnChange");
+			IPS_SetEventActive($eid, true);
+			IPS_SetEventScript($eid, "SWT_turnOffEverything(". $this->InstanceID .");");
+		}
+		
 		//Targets Kategorie erstellen
 		$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
     }
@@ -229,6 +243,30 @@ if (\$IPS_SENDER == \"WebFront\")
 				return $vid;
 			}
 			return $vid;
+		}
+	}
+	
+	//alle Werte, Timer, etc. zurrücksetzen
+	public function turnOffEverything()
+	{
+		if(@IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID) !== false)
+		{
+			$eid = IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID);
+			IPS_SetEventActive($eid, false);
+			IPS_DeleteEvent($eid);
+		}
+		
+		if(@IPS_GetObjectIDByIdent("Status", $this->InstanceID) !== false)
+		{
+			$vid = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
+			SetValue($vid, false);
+		}
+		
+		if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) !== false)
+		{
+			$eid = $IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
+			IPS_SetEventActive($eid, false);
+			IPS_DeleteEvent($eid);
 		}
 	}
  
@@ -465,15 +503,15 @@ if (\$IPS_SENDER == \"WebFront\")
 		
         public function refreshStatus() 
 		{
+			$dtid = IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID);
+			IPS_SetEventActive($dtid,false);
+			IPS_DeleteEvent($dtid);
+			
 			$instance = $this->ReadPropertyInteger("instance");
 			$automatik = IPS_GetObjectIDByIdent("Automatik",$instance);
 			$automatik = GetValue($automatik);
 			if($automatik)
 			{	
-				$dtid = IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID);
-				IPS_SetEventActive($dtid,false);
-				IPS_DeleteEvent($dtid);
-				
 				$sid = $this->ReadPropertyInteger("Sensor");
 				$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
 				$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
