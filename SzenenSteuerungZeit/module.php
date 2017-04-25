@@ -333,7 +333,7 @@ IPS_SetEventActive($vid, true);
 		
 		for($i = 1; $i <= $this->ReadPropertyInteger("SceneCount"); $i++) {
 			//TimerValues
-			if($this->ReadPropertyInteger("CycleThrough"))
+			if($this->ReadPropertyBoolean("CycleThrough"))
 			{
 				if(@IPS_GetObjectIDByIdent("Timer".$i, $this->InstanceID) === false)
 				{
@@ -369,7 +369,7 @@ IPS_SetEventActive($vid, true);
 			}
 		}
 		//Delete excessive Scences		
-		if($this->ReadPropertyInteger("CycleThrough"))
+		if($this->ReadPropertyBoolean("CycleThrough"))
 		{
 			$ChildrenIDsCount = (sizeof(IPS_GetChildrenIDs($this->InstanceID))-3)/3;
 		}
@@ -389,7 +389,7 @@ IPS_SetEventActive($vid, true);
 			for($j = $this->ReadPropertyInteger("SceneCount")+1; $j <= $ChildrenIDsCount; $j++) {
 				IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j, $this->InstanceID));
 				IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j."Data", $this->InstanceID));
-				if($this->ReadPropertyInteger("CycleThrough"))
+				if($this->ReadPropertyBoolean("CycleThrough"))
 				{
 					if(@IPS_GetObjectIDByIdent("Timer".$j, $this->InstanceID) !== false)
 					{
