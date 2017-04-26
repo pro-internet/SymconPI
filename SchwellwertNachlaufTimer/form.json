@@ -1,7 +1,7 @@
 {
   "elements":
   [
-	{ "type": "Label", "label": "Überwachtes Objekt" },
+	{ "type": "Label", "label": "Überwachte Objekte" },
 	{ "type": "SelectVariable", "name": "Sensor", "caption": "Sensor" },
 	{ "type": "Select", "name": "Unit", "caption": "Schwellwert Profil",
 	"options": [
@@ -12,9 +12,8 @@
 			{ "label": "Profil des Sensors verwenden", "value": "4" },
 		]
 	},
-	{ "type": "Label", "label": "Zusätzliche Sensoren" },
-	{ "type": "SelectVariable", "name": "Sensor2", "caption": "Sensor" },
-	{ "type": "Select", "name": "Unit2", "caption": "Schwellwert Profil",
+	{ "type": "SelectVariable", "name": "Sensor2", "caption": "Sensor2" },
+	{ "type": "Select", "name": "Unit2", "caption": "Schwellwert Profil2",
 	"options": [
 			{ "label": "Grad (°C)", "value": "1" },
 			{ "label": "Grad (°F)", "value": "2" },
@@ -23,8 +22,8 @@
 			{ "label": "Profil des Sensors verwenden", "value": "4" },
 		]
 	},
-	{ "type": "SelectVariable", "name": "Sensor3", "caption": "Sensor" },
-	{ "type": "Select", "name": "Unit3", "caption": "Schwellwert Profil",
+	{ "type": "SelectVariable", "name": "Sensor3", "caption": "Sensor3" },
+	{ "type": "Select", "name": "Unit3", "caption": "Schwellwert Profil3",
 	"options": [
 			{ "label": "Grad (°C)", "value": "1" },
 			{ "label": "Grad (°F)", "value": "2" },
