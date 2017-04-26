@@ -11,20 +11,14 @@ class SchwellwertTimer extends IPSModule {
 		parent::Create();
 		
 		$this->RegisterPropertyInteger("Unit", 4);
+		$this->RegisterPropertyInteger("Unit2", 4);
+		$this->RegisterPropertyInteger("Unit3", 4);
 		$this->RegisterPropertyInteger("Sensor", 0);
 		$this->RegisterPropertyInteger("Sensor2", 0);
 		$this->RegisterPropertyInteger("Sensor3", 0);
 		$this->RegisterPropertyString("valueOff", "0");
 		$this->RegisterPropertyString("valueOn", "1");
-		$this->RegisterPropertyInteger("instance", $this->InstanceID);
-		
-		//Custom Unit Einstellungsgrößen
-		$this->RegisterPropertyInteger("Type", 1);
-		$this->RegisterPropertyString("prefix", "");
-		$this->RegisterPropertyString("suffix", "");
-		$this->RegisterPropertyString("min", "0");
-		$this->RegisterPropertyString("max", "10");
-		$this->RegisterPropertyString("steps", "1");	
+		$this->RegisterPropertyInteger("instance", $this->InstanceID);	
 		
 		//SetValueScript erstellen
 		if(@IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID) === false)
@@ -273,79 +267,16 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_DeleteEvent($eid);
 		}
 	}
- 
-        // Überschreibt die intere IPS_ApplyChanges($id) Funktion
-        public function ApplyChanges() 
+		///////////////////
+		// Profilbereich //
+		///////////////////
+		
+		private function createVariableProfile($num = "")
 		{
-            // Diese Zeile nicht löschen
-            parent::ApplyChanges();
-			
-			//onchange event Sensor
-			if(@IPS_GetObjectIDByIdent("onChangeSensor",$this->InstanceID) === false)
-			{
-				$vid = $this->ReadPropertyInteger("Sensor");
-				if($vid >= 10000)
-				{
-					$eid = IPS_CreateEvent(0 /* ausgelößt */);
-					IPS_SetEventTrigger($eid,1,$vid);
-					IPS_SetEventScript($eid,"SWT_createDelayTimer(". $this->InstanceID .");");
-					IPS_SetIdent($eid,"onChangeSensor");
-					IPS_SetName($eid,"onChange Sensor");
-					IPS_SetParent($eid, $this->InstanceID);
-					IPS_SetHidden($eid,true);
-					IPS_SetEventActive($eid, true);
-				}
-			}
-			
-			//onchange event Sensor2
-			if(@IPS_GetObjectIDByIdent("onChangeSensor2",$this->InstanceID) === false)
-			{
-				$vid = $this->ReadPropertyInteger("Sensor2");
-				if($vid >= 10000)
-				{
-					$eid = IPS_CreateEvent(0 /* ausgelößt */);
-					IPS_SetEventTrigger($eid,1,$vid);
-					IPS_SetEventScript($eid,"SWT_createDelayTimer(". $this->InstanceID .");");
-					IPS_SetIdent($eid,"onChangeSensor2");
-					IPS_SetName($eid,"onChange Sensor2");
-					IPS_SetParent($eid, $this->InstanceID);
-					IPS_SetHidden($eid,true);
-					IPS_SetEventActive($eid, true);
-				}
-			}
-			
-			//onchange event Sensor3
-			if(@IPS_GetObjectIDByIdent("onChangeSensor3",$this->InstanceID) === false)
-			{
-				$vid = $this->ReadPropertyInteger("Sensor3");
-				if($vid >= 10000)
-				{
-					$eid = IPS_CreateEvent(0 /* ausgelößt */);
-					IPS_SetEventTrigger($eid,1,$vid);
-					IPS_SetEventScript($eid,"SWT_createDelayTimer(". $this->InstanceID .");");
-					IPS_SetIdent($eid,"onChangeSensor3");
-					IPS_SetName($eid,"onChange Sensor3");
-					IPS_SetParent($eid, $this->InstanceID);
-					IPS_SetHidden($eid,true);
-					IPS_SetEventActive($eid, true);
-				}
-			}
-
-			///////////////////
-			// Profilbereich //
-			///////////////////
-			switch($this->ReadPropertyInteger("Unit"))
+			switch($this->ReadPropertyInteger("Unit$num"))
 			{
 				case(1 /*°C*/):
-					if($this->ReadPropertyInteger("Sensor2") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"2");
-					}
-					if($this->ReadPropertyInteger("Sensor3") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"3");
-					}
-					$vid = $this->CreateLimitVariable(1 /* integer */);
+					$vid = $this->CreateLimitVariable(1 /* integer */,$num);
 				
 					if(!IPS_VariableProfileExists("SWT.DegreeCelsius"))
 					{
@@ -357,15 +288,7 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetVariableCustomProfile($vid, "SWT.DegreeCelsius");
 					break;
 				case(2 /*°F*/):
-					if($this->ReadPropertyInteger("Sensor2") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"2");
-					}
-					if($this->ReadPropertyInteger("Sensor3") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"3");
-					}
-					$vid = $this->CreateLimitVariable(1 /* integer */);
+					$vid = $this->CreateLimitVariable(1 /* integer */,$num);
 				
 					if(!IPS_VariableProfileExists("SWT.DegreeFahrenheit"))
 					{
@@ -377,15 +300,7 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetVariableCustomProfile($vid, "SWT.DegreeFahrenheit");
 					break;
 				case(3 /*Lux*/):
-					if($this->ReadPropertyInteger("Sensor2") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"2");
-					}
-					if($this->ReadPropertyInteger("Sensor3") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"3");
-					}
-					$vid = $this->CreateLimitVariable(1 /* integer */);
+					$vid = $this->CreateLimitVariable(1 /* integer */,$num);
 				
 					if(!IPS_VariableProfileExists("SWT.Lux"))
 					{
@@ -397,14 +312,6 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetVariableCustomProfile($vid, "SWT.Lux");
 					break;
 				case(4 /*same as sensor*/):
-					if($this->ReadPropertyInteger("Sensor2") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"2");
-					}
-					if($this->ReadPropertyInteger("Sensor3") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"3");
-					}
 					$sensorID = $this->ReadPropertyInteger("Sensor");
 					// Uberprüft die validität der Variable
 					if($sensorID >= 10000)
@@ -414,13 +321,13 @@ if (\$IPS_SENDER == \"WebFront\")
 						if($customProfile != "")
 						{
 							$type = IPS_GetVariable($sensorID)['VariableType'];
-							$vid = $this->CreateLimitVariable($type);
+							$vid = $this->CreateLimitVariable($type,$num);
 							IPS_SetVariableCustomProfile($vid, $customProfile);
 						}
 						else if($systemProfile != "")
 						{
 							$type = IPS_GetVariable($sensorID)['VariableType'];
-							$vid = $this->CreateLimitVariable($type);
+							$vid = $this->CreateLimitVariable($type,$num);
 							IPS_SetVariableCustomProfile($vid, $systemProfile);
 						}
 						else
@@ -447,49 +354,8 @@ if (\$IPS_SENDER == \"WebFront\")
 						}
 					}
 					break;
-				case(0 /*Custom*/):
-					if($this->ReadPropertyInteger("Sensor2") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"2");
-					}
-					if($this->ReadPropertyInteger("Sensor3") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"3");
-					}
-					$type = $this->ReadPropertyInteger("Type");
-					$vid = $this->CreateLimitVariable($type);
-					
-					if(!IPS_VariableProfileExists("SWT.Custom"))
-					{
-						IPS_CreateVariableProfile("SWT.Custom", $type);
-					}
-					else if(IPS_GetVariableProfile("SWT.Custom")['ProfileType'] != $type)
-					{
-						IPS_DeleteVariableProfile("SWT.Custom");
-						IPS_CreateVariableProfile("SWT.Custom", $type);
-					}
-					
-					$p = $this->ReadPropertyString("prefix");
-					$s = $this->ReadPropertyString("suffix");
-					$min = $this->ReadPropertyString("min");
-					$max = $this->ReadPropertyString("max");
-					$steps = $this->ReadPropertyString("steps");
-					IPS_SetVariableProfileValues("SWT.Custom", $min, $max, $steps);
-					IPS_SetVariableProfileText("SWT.Custom", $p, $s);
-					//IPS_SetVariableProfileIcon("SWT.Custom", "");
-					
-					IPS_SetVariableCustomProfile($vid, "SWT.Custom");
-					break;
 				case(5 /*Watt*/):
-					if($this->ReadPropertyInteger("Sensor2") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"2");
-					}
-					if($this->ReadPropertyInteger("Sensor3") >= 10000)
-					{
-						$vid = $this->CreateLimitVariable(1 /* integer */,"3");
-					}
-					$vid = $this->CreateLimitVariable(1 /* integer */);
+					$vid = $this->CreateLimitVariable(1 /* integer */,$num);
 				
 					if(!IPS_VariableProfileExists("SWT.Watt"))
 					{
@@ -506,7 +372,6 @@ if (\$IPS_SENDER == \"WebFront\")
 					{
 						
 						$error = "\nInvalid Unit Index: $unit\n";
-						$error .= "0: Custom\n";
 						$error .= "1: Degree (°C)\n";
 						$error .= "2: Degree (°F)\n";
 						$error .= "3: Lux (lx)\n";
@@ -520,6 +385,69 @@ if (\$IPS_SENDER == \"WebFront\")
 						echo 'Caught exception: ',  $e->getMessage(), "\n";
 					}
 			}
+		}
+ 
+		private function createSensorEvent($num = "")
+		{
+			if(@IPS_GetObjectIDByIdent("onChangeSensor$num",$this->InstanceID) === false)
+			{
+				$vid = $this->ReadPropertyInteger("Sensor$num");
+
+				$eid = IPS_CreateEvent(0 /* ausgelößt */);
+				IPS_SetEventTrigger($eid,1,$vid);
+				IPS_SetEventScript($eid,"SWT_createDelayTimer(". $this->InstanceID .");");
+				IPS_SetIdent($eid,"onChangeSensor$num");
+				IPS_SetName($eid,"onChange Sensor$num");
+				IPS_SetParent($eid, $this->InstanceID);
+				IPS_SetHidden($eid,true);
+				IPS_SetEventActive($eid, true);
+			}
+			else
+			{
+				$eid = IPS_GetObjectIDByIdent("onChangeSensor$num",$this->InstanceID);
+				$eidTriggerID = IPS_GetEvent($eid)['TriggerVariableID'];
+				$newSensorID = $this->ReadPropertyInteger("Sensor$num");
+				if($eidTriggerID != $newSensorID && $newSensorID >= 10000)
+				{
+					IPS_DeleteEvent($eid);
+					$this->createSensorEvent($num);
+				}
+			}
+		}
+ 
+		// Überschreibt die intere IPS_ApplyChanges($id) Funktion
+        public function ApplyChanges() 
+		{
+            // Diese Zeile nicht löschen
+            parent::ApplyChanges();
+			
+			//onchange event Sensor
+			$this->createSensorEvent();
+
+			$vid = $this->ReadPropertyInteger("Sensor2");
+			if($vid >= 10000)
+			{
+				$this->createSensorEvent("2");
+			}
+			$vid = $this->ReadPropertyInteger("Sensor3");
+			if($vid >= 10000)
+			{
+				$this->createSensorEvent("3");
+			}
+
+			///////////////////
+			// Profilbereich //
+			///////////////////
+			$this->createVariableProfile();
+			if($this->ReadPropertyInteger("Sensor2") >= 10000)
+			{
+				$this->createVariableProfile("2");
+			}
+			if($this->ReadPropertyInteger("Sensor3") >= 10000)
+			{
+				$this->createVariableProfile("3");
+			}
+			
 			//////////////////
 			// Logikbereich //
 			//////////////////
@@ -536,83 +464,73 @@ if (\$IPS_SENDER == \"WebFront\")
         */
 		public function createDelayTimer()
 		{
-			$sid = $this->ReadPropertyInteger("Sensor");
-			$sid2 = $this->ReadPropertyInteger("Sensor2");
-			$sid3 =$this->ReadPropertyInteger("Sensor3");
-			$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
-			$lid2 = IPS_GetObjectIDByIdent("limit2", $this->InstanceID);
-			$lid3 = IPS_GetObjectIDByIdent("limit3", $this->InstanceID);
-			$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
-			$ntID = IPS_GetObjectIDByIdent("NachlaufzeitVariable", $this->InstanceID);
-			
-			//limits
-			try
+			$instance = $this->ReadPropertyInteger("instance");
+			$automatik = IPS_GetObjectIDByIdent("Automatik",$instance);
+			$automatik = GetValue($automatik);
+			if($automatik)
 			{
-				$limit = GetValue($lid);
-			}
-			catch(Exception $e)
-			{
-				echo 'can not get Value of Limit ' . $lid . '\n', $e->GetMessage(), '\n';
-			}
-			if($sid2 >= 10000)
-				$limit2 = GetValue($lid2);
-			else 
-				$limit2 = PHP_INT_MIN;
-			if($sid3 >= 10000) 
-				$limit3 = GetValue($lid3); 
-			else
-				$limit3 = PHP_INT_MIN;
-			//sensors
-			try
-			{
-				$sensor = GetValue($sid);
-			}
-			catch(Exception $e)
-			{
-				echo 'can not get Value of Sensor ' . $sid . '\n', $e->GetMessage(), '\n';
-			}
-			if($sid2 >= 10000)
-				$sensor2 = GetValue($sid2);
-			else 
-				$sensor2 = PHP_INT_MAX;
-			if($sid3 >= 10000) 
-				$sensor3 = GetValue($sid3); 
-			else
-				$sensor3 = PHP_INT_MAX;
-			
-			$nachlaufzeit = GetValue($ntID);
-			if($nachlaufzeit < 1) { $nachlaufzeit = 0.05; }
-			if($limit < $sensor && $limit2 < $sensor2 && $limit3 < $sensor3) //Above limit
-			{
-				if(@IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID) === false)
-				{
-					$eid = IPS_CreateEvent(1 /*zyklisch*/);
-					IPS_SetHidden($eid,true);
-					IPS_SetName($eid, "Delay Timer");
-					IPS_SetParent($eid, $this->InstanceID);
-					IPS_SetIdent($eid, "DelayTimer");
-					IPS_SetEventScript($eid, "SWT_refreshStatus(". $this->InstanceID .");");
-					IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
-					$delay = GetValue(IPS_GetObjectIDByIdent("DelayVar", $this->InstanceID));
-					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $delay);
-					IPS_SetEventActive($eid, true);
-				}
+				$sid = $this->ReadPropertyInteger("Sensor");
+				$sid2 = $this->ReadPropertyInteger("Sensor2");
+				$sid3 =$this->ReadPropertyInteger("Sensor3");
+				$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
+				$lid2 = IPS_GetObjectIDByIdent("limit2", $this->InstanceID);
+				$lid3 = IPS_GetObjectIDByIdent("limit3", $this->InstanceID);
+				$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
+				$ntID = IPS_GetObjectIDByIdent("NachlaufzeitVariable", $this->InstanceID);
 				
-				if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) !== false)
+				//limits
+				try
 				{
-					$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
-					IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
-					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit + $delay /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
-					IPS_SetEventActive($eid, true);
-					IPS_SetHidden($eid,false);
-				}	
-			}
-			else
-			{
-				$ntVarChanged = IPS_GetVariable($ntID)['VariableChanged'];
-				$time = time();
-				if($ntVarChanged < $time + 2 && $ntVarChanged > $time - 2)
+					$limit = GetValue($lid);
+				}
+				catch(Exception $e)
 				{
+					echo 'can not get Value of Limit ' . $lid . '\n', $e->GetMessage(), '\n';
+				}
+				if($sid2 >= 10000)
+					$limit2 = GetValue($lid2);
+				else 
+					$limit2 = PHP_INT_MIN;
+				if($sid3 >= 10000) 
+					$limit3 = GetValue($lid3); 
+				else
+					$limit3 = PHP_INT_MIN;
+				//sensors
+				try
+				{
+					$sensor = GetValue($sid);
+				}
+				catch(Exception $e)
+				{
+					echo 'can not get Value of Sensor ' . $sid . '\n', $e->GetMessage(), '\n';
+				}
+				if($sid2 >= 10000)
+					$sensor2 = GetValue($sid2);
+				else 
+					$sensor2 = PHP_INT_MAX;
+				if($sid3 >= 10000) 
+					$sensor3 = GetValue($sid3); 
+				else
+					$sensor3 = PHP_INT_MAX;
+				
+				$nachlaufzeit = GetValue($ntID);
+				if($nachlaufzeit < 1) { $nachlaufzeit = 0.05; }
+				if($limit < $sensor && $limit2 < $sensor2 && $limit3 < $sensor3) //Above limit
+				{
+					if(@IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID) === false)
+					{
+						$eid = IPS_CreateEvent(1 /*zyklisch*/);
+						IPS_SetHidden($eid,true);
+						IPS_SetName($eid, "Delay Timer");
+						IPS_SetParent($eid, $this->InstanceID);
+						IPS_SetIdent($eid, "DelayTimer");
+						IPS_SetEventScript($eid, "SWT_refreshStatus(". $this->InstanceID .");");
+						IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
+						$delay = GetValue(IPS_GetObjectIDByIdent("DelayVar", $this->InstanceID));
+						IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $delay);
+						IPS_SetEventActive($eid, true);
+					}
+					
 					if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) !== false)
 					{
 						$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
@@ -620,6 +538,45 @@ if (\$IPS_SENDER == \"WebFront\")
 						IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit + $delay /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
 						IPS_SetEventActive($eid, true);
 						IPS_SetHidden($eid,false);
+					}	
+				}
+				else
+				{
+					$ntVarChanged = IPS_GetVariable($ntID)['VariableChanged'];
+					$time = time();
+					if($ntVarChanged < $time + 2 && $ntVarChanged > $time - 2)
+					{
+						if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) !== false)
+						{
+							$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
+							IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
+							IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $nachlaufzeit + $delay /*Minuten zu Sekunden*/ /* Alle 2 Minuten */);
+							IPS_SetEventActive($eid, true);
+							IPS_SetHidden($eid,false);
+						}
+					}
+					if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) !== false)
+					{
+						$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
+						$eventActive = IPS_GetEvent($eid)['EventActive'];
+						if($eventActive)
+						{
+							$this->nachlaufzeitAbgelaufen = false;
+						}
+						else
+						{
+							$this->nachlaufzeitAbgelaufen = true;
+						}
+					}
+					else
+					{
+						$this->nachlaufzeitAbgelaufen = true;
+					}
+					
+					if($this->nachlaufzeitAbgelaufen == true)
+					{
+						$_IPS['SELF'] = "WebFront";
+						SetValue($statusID,0);
 					}
 				}
 			}
@@ -709,6 +666,24 @@ if (\$IPS_SENDER == \"WebFront\")
 				}
 				else //Below limit
 				{
+					if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) !== false)
+					{
+						$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID);
+						$eventActive = IPS_GetEvent($eid)['EventActive'];
+						if($eventActive)
+						{
+							$this->nachlaufzeitAbgelaufen = false;
+						}
+						else
+						{
+							$this->nachlaufzeitAbgelaufen = true;
+						}
+					}
+					else
+					{
+						$this->nachlaufzeitAbgelaufen = true;
+					}
+					
 					if($this->nachlaufzeitAbgelaufen == true)
 					{
 						$_IPS['SELF'] = "WebFront";
@@ -725,7 +700,6 @@ if (\$IPS_SENDER == \"WebFront\")
 			$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID );
 			IPS_SetHidden($eid,true);
 			IPS_SetEventActive($eid,false);
-			return $eid;
 		}
 		
 		public function statusOnChange()
