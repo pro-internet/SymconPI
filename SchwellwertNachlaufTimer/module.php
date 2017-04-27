@@ -50,18 +50,25 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetName($vid, "Verzögerung");
 			IPS_SetIdent($vid, "DelayVar");
 			IPS_SetPosition($vid,2);
-			if(IPS_VariableProfileExists("SWT.Delay"))
+			if(IPS_VariableProfileExists("~UnixTimestampTime"))
 			{
-				IPS_SetVariableCustomProfile($vid,"SWT.Delay");
+				IPS_SetVariableCustomProfile($vid,"~UnixTimestampTime");
 			}
 			else
 			{
-				IPS_CreateVariableProfile("SWT.Delay", 1);
-				IPS_SetVariableProfileValues("SWT.Delay", 0, 600, 1);
-				IPS_SetVariableProfileText("SWT.Delay",""," Sek.");
-				//IPS_SetVariableProfileIcon("SWT.Delay", "");
-				
-				IPS_SetVariableCustomProfile($vid,"SWT.Delay");
+				if(IPS_VariableProfileExists("SWT.Delay"))
+				{
+					IPS_SetVariableCustomProfile($vid,"SWT.Delay");
+				}
+				else
+				{
+					IPS_CreateVariableProfile("SWT.Delay", 1);
+					IPS_SetVariableProfileValues("SWT.Delay", 0, 600, 1);
+					IPS_SetVariableProfileText("SWT.Delay",""," Sek.");
+					//IPS_SetVariableProfileIcon("SWT.Delay", "");
+					
+					IPS_SetVariableCustomProfile($vid,"SWT.Delay");
+				}
 			}
 			IPS_SetVariableCustomAction($vid,$svid);
 			SetValue($vid,1);	
@@ -96,8 +103,9 @@ if (\$IPS_SENDER == \"WebFront\")
 		//Status OnChange event
 		if(@IPS_GetObjectIDByIdent("StatusOnChange",$this->InstanceID) === false)
 		{
+			$vid = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
 			$eid = IPS_CreateEvent(0);
-			IPS_SetEventTrigger($eid,1,$this->InstanceID);
+			IPS_SetEventTrigger($eid,1,$vid);
 			IPS_SetParent($eid,$this->InstanceID);
 			IPS_SetName($eid,"Status OnChange");
 			IPS_SetIdent($eid,"StatusOnChange");
@@ -114,18 +122,25 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetName($vid, "Nachlauf");
 			IPS_SetIdent($vid, "NachlaufzeitVariable");
 			IPS_SetPosition($vid, 3);
-			if(IPS_VariableProfileExists("SWT.Seconds"))
+			if(IPS_VariableProfileExists("~UnixTimestampTime"))
 			{
-				IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
+				IPS_SetVariableCustomProfile($vid,"~UnixTimestampTime");
 			}
 			else
 			{
-				IPS_CreateVariableProfile("SWT.Seconds", 1);
-				IPS_SetVariableProfileValues("SWT.Seconds", 0, 86400, 1);
-				IPS_SetVariableProfileText("SWT.Seconds",""," Sek.");
-				//IPS_SetVariableProfileIcon("SWT.Seconds", "");
-				
-				IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
+				if(IPS_VariableProfileExists("SWT.Seconds"))
+				{
+					IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
+				}
+				else
+				{
+					IPS_CreateVariableProfile("SWT.Seconds", 1);
+					IPS_SetVariableProfileValues("SWT.Seconds", 0, 7200, 1);
+					IPS_SetVariableProfileText("SWT.Seconds",""," Sek.");
+					//IPS_SetVariableProfileIcon("SWT.Seconds", "");
+					
+					IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
+				}
 			}
 			IPS_SetVariableCustomAction($vid,$svid);
 			SetValue($vid,1);
@@ -482,10 +497,12 @@ if (\$IPS_SENDER == \"WebFront\")
 			{
 				$sid = $this->ReadPropertyInteger("Sensor");
 				$sid2 = $this->ReadPropertyInteger("Sensor2");
-				$sid3 =$this->ReadPropertyInteger("Sensor3");
+				$sid3 = $this->ReadPropertyInteger("Sensor3");
 				$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
-				$lid2 = IPS_GetObjectIDByIdent("limit2", $this->InstanceID);
-				$lid3 = IPS_GetObjectIDByIdent("limit3", $this->InstanceID);
+				$lid2 = @IPS_GetObjectIDByIdent("limit2", $this->InstanceID);
+				$lid2 = (int) $lid2;
+				$lid3 = @IPS_GetObjectIDByIdent("limit3", $this->InstanceID);
+				$lid3 = (int) $lid3;
 				$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
 				$ntID = IPS_GetObjectIDByIdent("NachlaufzeitVariable", $this->InstanceID);
 				
@@ -525,6 +542,11 @@ if (\$IPS_SENDER == \"WebFront\")
 					$sensor3 = PHP_INT_MAX;
 				
 				$nachlaufzeit = GetValue($ntID);
+				//format timestamp
+				if(IPS_VariableProfileExists("~UnixTimestampTime"))
+				{
+					$nachlaufzeit += 3600;
+				}
 				if($nachlaufzeit < 1) { $nachlaufzeit = 0.05; }
 				if($limit < $sensor && $limit2 < $sensor2 && $limit3 < $sensor3) //Above limit
 				{
@@ -536,11 +558,19 @@ if (\$IPS_SENDER == \"WebFront\")
 						IPS_SetParent($eid, $this->InstanceID);
 						IPS_SetIdent($eid, "DelayTimer");
 						IPS_SetEventScript($eid, "SWT_refreshStatus(". $this->InstanceID .");");
-						IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
-						$delay = GetValue(IPS_GetObjectIDByIdent("DelayVar", $this->InstanceID));
-						IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $delay);
-						IPS_SetEventActive($eid, true);
 					}
+					else
+					{
+						$eid = IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID);
+					}
+					IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
+					$delay = GetValue(IPS_GetObjectIDByIdent("DelayVar", $this->InstanceID));
+					if(IPS_VariableProfileExists("~UnixTimestampTime"))
+					{
+						$delay += 3600;
+					}
+					IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , $delay);
+					IPS_SetEventActive($eid, true);
 					
 					if(@IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID) !== false)
 					{
@@ -590,6 +620,18 @@ if (\$IPS_SENDER == \"WebFront\")
 						SetValue($statusID,0);
 					}
 				}
+			}
+			if(@IPS_GetObjectIDByIdent("VerzogerungOnChange",$this->InstanceID) === false)
+			{
+				$vid = IPS_GetObjectIDByIdent("DelayVar", $this->InstanceID);
+				$eid = IPS_CreateEvent(0 /*ausgelöst*/);
+				IPS_SetName($eid, "Verzögerung OnChange");
+				IPS_SetParent($eid, $this->InstanceID);
+				IPS_SetIdent($eid, "VerzogerungOnChange");
+				IPS_SetEventTrigger($eid,1,$vid);
+				IPS_SetEventScript($eid,"SWT_createDelayTimer(". $this->InstanceID .");");
+				IPS_SetEventActive($eid,true);
+				return $eid;
 			}
 		}
 		
@@ -652,6 +694,11 @@ if (\$IPS_SENDER == \"WebFront\")
 					$sensor3 = PHP_INT_MAX;
 				
 				$nachlaufzeit = GetValue($ntID);
+				//format timestamp
+				if(IPS_VariableProfileExists("~UnixTimestampTime"))
+				{
+					$nachlaufzeit += 3600;
+				}
 				if($nachlaufzeit < 1) { $nachlaufzeit = 0.05; }
 				if($limit < $sensor && $limit2 < $sensor2 && $limit3 < $sensor3) //Above limit
 				{
