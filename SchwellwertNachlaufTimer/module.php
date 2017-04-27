@@ -735,7 +735,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			
 			foreach(IPS_GetChildrenIDs($targets) as $target) 
 			{
-				//only allow links
+				/*only allow links*/
 				if(IPS_LinkExists($target)) 
 				{
 					$linkVariableID = IPS_GetLink($target)['TargetID'];
