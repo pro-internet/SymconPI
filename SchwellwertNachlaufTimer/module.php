@@ -705,9 +705,12 @@ if (\$IPS_SENDER == \"WebFront\")
 		public function nachlaufzeitAbgelaufen()
 		{
 			$this->nachlaufzeitAbgelaufen = true;
+			
 			$eid = IPS_GetObjectIDByIdent("NachlaufTimer", $this->InstanceID );
 			IPS_SetHidden($eid,true);
 			IPS_SetEventActive($eid,false);
+			IPS_Sleep(100);
+			$this->createDelayTimer();
 		}
 		
 		public function statusOnChange()
