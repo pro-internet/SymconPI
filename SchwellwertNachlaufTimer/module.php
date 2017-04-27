@@ -46,19 +46,19 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetParent($vid, $this->InstanceID);
 			IPS_SetName($vid, "Verzögerung");
 			IPS_SetIdent($vid, "DelayVar");
-			IPS_SetPosition($vid,3);
-			if(IPS_VariableProfileExists("SWT.Seconds"))
+			IPS_SetPosition($vid,2);
+			if(IPS_VariableProfileExists("SWT.Delay"))
 			{
-				IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
+				IPS_SetVariableCustomProfile($vid,"SWT.Delay");
 			}
 			else
 			{
-				IPS_CreateVariableProfile("SWT.Seconds", 1);
-				IPS_SetVariableProfileValues("SWT.Seconds", 0, 86400, 1);
-				IPS_SetVariableProfileText("SWT.Seconds",""," Sek.");
-				//IPS_SetVariableProfileIcon("SWT.Seconds", "");
+				IPS_CreateVariableProfile("SWT.Delay", 1);
+				IPS_SetVariableProfileValues("SWT.Delay", 0, 600, 1);
+				IPS_SetVariableProfileText("SWT.Delay",""," Sek.");
+				//IPS_SetVariableProfileIcon("SWT.Delay", "");
 				
-				IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
+				IPS_SetVariableCustomProfile($vid,"SWT.Delay");
 			}
 			IPS_SetVariableCustomAction($vid,$svid);
 			SetValue($vid,1);	
@@ -110,7 +110,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetParent($vid, $this->InstanceID);
 			IPS_SetName($vid, "Nachlauf");
 			IPS_SetIdent($vid, "NachlaufzeitVariable");
-			IPS_SetPosition($vid, 2);
+			IPS_SetPosition($vid, 3);
 			if(IPS_VariableProfileExists("SWT.Seconds"))
 			{
 				IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
@@ -191,7 +191,15 @@ if (\$IPS_SENDER == \"WebFront\")
 			$svid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 			$vid = IPS_CreateVariable($type);
 			IPS_SetParent($vid, $this->InstanceID);
-			IPS_SetName($vid, "Schwellwert$num");
+			if($num == "")
+			{
+				IPS_SetName($vid, "Schwellwert1");
+			}
+			else
+			{
+				IPS_SetName($vid, "Schwellwert$num");
+			}
+			
 			IPS_SetIdent($vid, "limit$num");
 			IPS_SetPosition($vid, 1);
 			IPS_SetVariableCustomAction($vid, $svid);
