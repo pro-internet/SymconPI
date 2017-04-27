@@ -10,16 +10,19 @@ class SchwellwertTimer extends IPSModule {
 		// Diese Zeile nicht löschen.
 		parent::Create();
 		
-		$this->RegisterPropertyInteger("Unit", 4);
-		$this->RegisterPropertyInteger("Unit2", 4);
-		$this->RegisterPropertyInteger("Unit3", 4);
-		$this->RegisterPropertyInteger("Sensor", 0);
-		$this->RegisterPropertyInteger("Sensor2", 0);
-		$this->RegisterPropertyInteger("Sensor3", 0);
-		$this->RegisterPropertyString("valueOff", "0");
-		$this->RegisterPropertyString("valueOn", "1");
-		$this->RegisterPropertyInteger("instance", $this->InstanceID);	
-		
+		if(@$this->RegisterPropertyInteger("Sensor") !== false)
+		{
+			$this->RegisterPropertyInteger("Unit", 4);
+			$this->RegisterPropertyInteger("Unit2", 4);
+			$this->RegisterPropertyInteger("Unit3", 4);
+			$this->RegisterPropertyInteger("Sensor", 0);
+			$this->RegisterPropertyInteger("Sensor2", 0);
+			$this->RegisterPropertyInteger("Sensor3", 0);
+			$this->RegisterPropertyString("valueOff", "0");
+			$this->RegisterPropertyString("valueOn", "1");
+			$this->RegisterPropertyInteger("instance", $this->InstanceID);	
+		}
+
 		//SetValueScript erstellen
 		if(@IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID) === false)
 		{
@@ -119,7 +122,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			{
 				IPS_CreateVariableProfile("SWT.Seconds", 1);
 				IPS_SetVariableProfileValues("SWT.Seconds", 0, 86400, 1);
-				IPS_SetVariableProfileText("SWT.Seconds",""," Min.");
+				IPS_SetVariableProfileText("SWT.Seconds",""," Sek.");
 				//IPS_SetVariableProfileIcon("SWT.Seconds", "");
 				
 				IPS_SetVariableCustomProfile($vid,"SWT.Seconds");
@@ -314,13 +317,13 @@ if (\$IPS_SENDER == \"WebFront\")
 					{
 					IPS_CreateVariableProfile("SWT.Lux", 1);
 					IPS_SetVariableProfileValues("SWT.Lux", 0, 80000, 1000);
-					IPS_SetVariableProfileText("SWT.Lux", "", "lx");
+					IPS_SetVariableProfileText("SWT.Lux", "", " lx");
 					//IPS_SetVariableProfileIcon("SWT.Lux", "");
 					}
 					IPS_SetVariableCustomProfile($vid, "SWT.Lux");
 					break;
 				case(4 /*same as sensor*/):
-					$sensorID = $this->ReadPropertyInteger("Sensor");
+					$sensorID = $this->ReadPropertyInteger("Sensor$num");
 					// Uberprüft die validität der Variable
 					if($sensorID >= 10000)
 					{
@@ -710,7 +713,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetHidden($eid,true);
 			IPS_SetEventActive($eid,false);
 			IPS_Sleep(100);
-			$this->createDelayTimer();
+			$this->refreshStatus();
 		}
 		
 		public function statusOnChange()

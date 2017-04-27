@@ -2,8 +2,8 @@
   "elements":
   [
 	{ "type": "Label", "label": "Überwachte Objekte" },
-	{ "type": "SelectVariable", "name": "Sensor", "caption": "Sensor" },
-	{ "type": "Select", "name": "Unit", "caption": "Schwellwert Profil",
+	{ "type": "SelectVariable", "name": "Sensor", "caption": "Sensor1" },
+	{ "type": "Select", "name": "Unit", "caption": "Schwellwert Profil1",
 	"options": [
 			{ "label": "Grad (°C)", "value": "1" },
 			{ "label": "Grad (°F)", "value": "2" },
