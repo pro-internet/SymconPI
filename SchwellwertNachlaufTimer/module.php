@@ -65,7 +65,7 @@ if (\$IPS_SENDER == \"WebFront\")
 		}
 		
 		//Status Variable erstellen
-		if(@IPS_GetObjectIDByIdent("StatusVariable", $this->InstanceID) === false)
+		if(@IPS_GetObjectIDByIdent("Status", $this->InstanceID) === false)
 		{
 			$svid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 			$vid = IPS_CreateVariable(0 /* Boolean */);
@@ -94,8 +94,8 @@ if (\$IPS_SENDER == \"WebFront\")
 		if(@IPS_GetObjectIDByIdent("StatusOnChange",$this->InstanceID) === false)
 		{
 			$eid = IPS_CreateEvent(0);
-			IPS_SetEventTrigger($eid,1,$vid);
-			IPS_SetParent($eid,$vid);
+			IPS_SetEventTrigger($eid,1,$this->InstanceID);
+			IPS_SetParent($eid,$this->InstanceID);
 			IPS_SetName($eid,"Status OnChange");
 			IPS_SetIdent($eid,"StatusOnChange");
 			IPS_SetEventActive($eid, true);
@@ -133,7 +133,7 @@ if (\$IPS_SENDER == \"WebFront\")
 		{
 			$eid = IPS_CreateEvent(0);
 			IPS_SetEventTrigger($eid,1,$vid);
-			IPS_SetParent($eid,$vid);
+			IPS_SetParent($eid,$this->InstanceID);
 			IPS_SetName($eid,"Nachlaufzeit OnChange");
 			IPS_SetIdent($eid,"NachlaufzeitOnChange");
 			IPS_SetEventActive($eid, true);
@@ -171,7 +171,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			$eid = IPS_CreateEvent(0);
 			IPS_SetEventTrigger($eid,1,$vid);
 			IPS_SetEventTriggerValue($eid,false);
-			IPS_SetParent($eid,$vid);
+			IPS_SetParent($eid,$this->InstanceID);
 			IPS_SetName($eid,"Trigger OnChange");
 			IPS_SetIdent($eid,"TriggerOnChange");
 			IPS_SetEventActive($eid, true);
