@@ -595,9 +595,12 @@ if (\$IPS_SENDER == \"WebFront\")
 		
         public function refreshStatus() 
 		{
-			$dtid = IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID);
-			IPS_SetEventActive($dtid,false);
-			IPS_DeleteEvent($dtid);
+			if(IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID) !== false)
+			{
+				$dtid = IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID);
+				IPS_SetEventActive($dtid,false);
+				IPS_DeleteEvent($dtid);
+			}
 			
 			$instance = $this->ReadPropertyInteger("instance");
 			$automatik = IPS_GetObjectIDByIdent("Automatik",$instance);
