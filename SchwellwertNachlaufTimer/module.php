@@ -804,7 +804,7 @@ if (\$IPS_SENDER == \"WebFront\")
 						else
 							$actionID = $v["VariableAction"];
 						
-						//Skip this device if we do not have a proper id
+						/*Skip this device if we do not have a proper id*/
 							if($actionID < 10000)
 							{
 								SetValue($id,$value);
