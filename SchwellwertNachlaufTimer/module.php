@@ -558,12 +558,12 @@ if (\$IPS_SENDER == \"WebFront\")
 						IPS_SetParent($eid, $this->InstanceID);
 						IPS_SetIdent($eid, "DelayTimer");
 						IPS_SetEventScript($eid, "SWT_refreshStatus(". $this->InstanceID .");");
+						IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
 					}
 					else
 					{
 						$eid = IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID);
 					}
-					IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
 					$delay = GetValue(IPS_GetObjectIDByIdent("DelayVar", $this->InstanceID));
 					if(IPS_VariableProfileExists("~UnixTimestampTime"))
 					{
