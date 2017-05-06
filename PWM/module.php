@@ -5,6 +5,10 @@ class PWM extends IPSModule {
 		//Never delete this line!
 		parent::Create();
 
+		if(@$this->RegisterPropertyInteger("Stellmotor") !== false)
+		{
+			$this-RegisterPropertyInteger("Stellmotor",0);
+		}
 	}
 
 	public function Destroy() {
