@@ -30,14 +30,11 @@ class PWM extends IPSModule {
 	{
 		if($parent == "thisInstance")
 			$parent = $this->InstanceID;
-		echo $parent;
-		echo $ident;
 		if(@IPS_GetObjectIDByIdent($ident, $parent) === false)
 		{
 			$eid = IPS_CreateEvent(1 /*züklisch*/);
 			IPS_SetName($eid, $name);
 			IPS_SetParent($eid, $parent);
-			echo "\n" . $eid . "\n";
 			IPS_SetIdent($eid, $ident);
 			IPS_SetEventScript($eid, $script);
 		}
@@ -88,6 +85,15 @@ if (\$IPS_SENDER == \"WebFront\")
 ?>");
 		}
 		
+		//Targets Kategorie erstellen
+		if(@IPS_GetObjectIDByIdent("TargetsCat", $this->InstanceID) === false)
+		{
+			$cid = IPS_CreateCategory();
+			IPS_SetParent($cid, $this->InstanceID);
+			IPS_SetName($cid, "Targets");
+			IPS_SetIdent($cid, "TargetsCat");
+		}
+		
 		//°C Profil erstellen
 		if(!IPS_VariableProfileExists("PWM.Celsius"))
 		{
@@ -126,6 +132,7 @@ if (\$IPS_SENDER == \"WebFront\")
 		if(@IPS_GetObjectIDByIdent("IntervalVar",$this->InstanceID) === false)
 		{
 			$vid = $this->CreateVariable(2,"Interval","IntervalVar","PWM.Minutes",$sid);
+			SetValue($vid,1);
 		}
 		else
 		{
@@ -148,6 +155,7 @@ if (\$IPS_SENDER == \"WebFront\")
 		if(@IPS_GetObjectIDByIdent("OeffnungszeitVar",$this->InstanceID) === false)
 		{
 			$vid = $this->CreateVariable(2,"Minimale Öffnungszeit", "OeffnungszeitVar", "PWM.Minutes", $sid);
+			SetValue($vid,1);
 		}
 		
 		//Soll-Wert Variable erstellen
@@ -206,33 +214,69 @@ if (\$IPS_SENDER == \"WebFront\")
 	public function ApplyChanges() {
 		//Never delete this line!
 		parent::ApplyChanges();
+		
+		//Ist-Wert onChange Event
+		if(@IPS_GetObjectIDByIdent("IstwertOnChange", $this->InstanceID) === false)
+		{
+			$eid = IPS_CreateEvent(0);
+			IPS_SetParent($eid, $this->InstanceID);
+			IPS_SetName($eid, "Istwert onChange");
+			IPS_SetIdent($eid, "IstwertOnChange");
+			IPS_SetEventTrigger($eid, 1, $this->ReadPropertyInteger("IstWert"));
+			IPS_SetEventScript($eid, "PWM_refresh(". $this->InstanceID .");");
+			IPS_SetEventActive($eid, true);
+		}
+		else
+		{
+			$eid = IPS_GetObjectIDByIdent("IstwertOnChange", $this->InstanceID);
+			IPS_SetEventTrigger($eid, 1, $this->ReadPropertyInteger("IstWert"));
+		}
+		
 		$this->refresh();
 	}
 	
 	private function setValueHeating($value)
 	{
-		$vid = $this->ReadPropertyInteger("Stellmotor");
-		$v = IPS_GetVariable($vid);
-		$o = IPS_GetObject($vid);
-		
-		if($v["VariableCustomAction"] > 0)
-			$actionID = $v["VariableCustomAction"];
-		else
-			$actionID = $v["VariableAction"];
-		
-		if($actionID < 10000)
+		$targets = IPS_GetObjectIDByIdent("TargetsCat", $this->InstanceID);
+		foreach(IPS_GetChildrenIDs($targets) as $target) 
 		{
-			SetValue($vid, $value);
-		}
-		else
-		{
-			if(IPS_InstanceExists($actionID)) 
+			/*only allow links*/
+			if(IPS_LinkExists($target)) 
 			{
-				IPS_RequestAction($actionID, $o["ObjectIdent"], $value);
-			}
-			else if(IPS_ScriptExists($actionID))
-			{
-				echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $vid, "VALUE" => $value, "SENDER" => "WebFront"));
+				$linkVariableID = IPS_GetLink($target)['TargetID'];
+				if(IPS_VariableExists($linkVariableID)) 
+				{
+					$type = IPS_GetVariable($linkVariableID)['VariableType'];
+					$id = $linkVariableID;
+					
+					$o = IPS_GetObject($id);
+					$v = IPS_GetVariable($id);
+					
+					if($v['VariableType'] == 0)
+					{
+						$value = (bool) $value;
+					}
+					
+					if($v["VariableCustomAction"] > 0)
+						$actionID = $v["VariableCustomAction"];
+					else
+						$actionID = $v["VariableAction"];
+					
+					/*Skip this device if we do not have a proper id*/
+						if($actionID < 10000)
+						{
+							SetValue($id,$value);
+							continue;
+						}
+					if(IPS_InstanceExists($actionID)) 
+					{
+						IPS_RequestAction($actionID, $o["ObjectIdent"], $value);
+					}
+					else if(IPS_ScriptExists($actionID))
+					{
+						echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value, "SENDER" => "WebFront"));
+					}
+				}
 			}
 		}
 	}
@@ -243,8 +287,8 @@ if (\$IPS_SENDER == \"WebFront\")
 	
 	public function refresh()
 	{
-		$stellmotorID = $this->ReadPropertyInteger("Stellmotor");
-		if($stellmotorID >= 10000)
+		$var['istwert'] = $this->ReadPropertyInteger("IstWert");
+		if($var['istwert'] >= 10000)
 		{	
 			$var['istwert'] = $this->ReadPropertyInteger("IstWert");
 			$var['sollwert'] = IPS_GetObjectIDByIdent("SollwertVar", $this->InstanceID);
@@ -253,7 +297,6 @@ if (\$IPS_SENDER == \"WebFront\")
 			$var['oeffnungszeit'] = IPS_GetObjectIDByIdent("OeffnungszeitVar", $this->InstanceID);
 			foreach($var as $i => $v)
 			{
-				echo $v . "\n";
 				$var[$i] = GetValue($v);
 			}
 			if($var['trigger'] == 0)
@@ -275,7 +318,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			if($oeffnungszeit <= $var['oeffnungszeit'])
 			{
 				$this->setValueHeating(false);
-				echo "Heizung Stellmotor zu!";
+				//"Heizung Stellmotor zu!";
 			}
 			else
 			{
@@ -290,7 +333,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				IPS_SetEventActive($eid, true);
 				IPS_SetHidden($eid, false);
 				
-				echo "Heizung Stellmotor auf für $oeffnungszeit Minuten";
+				//"Heizung Stellmotor auf für $oeffnungszeit Minuten";
 			}
 		}
 	}
@@ -298,9 +341,9 @@ if (\$IPS_SENDER == \"WebFront\")
 	public function heatingOff()
 	{
 		$this->setValueHeating(false); //stellmotor aus
-		if(@IPS_GetObjectIDByIdent("TurnOffHeatingTimer", $this->InstanceID) !== false)
+		if(@IPS_GetObjectIDByIdent("heatingOffTimer", $this->InstanceID) !== false)
 		{
-			$eid = IPS_GetObjectIDByIdent("TurnOffHeatingTimer", $this->InstanceID);
+			$eid = IPS_GetObjectIDByIdent("heatingOffTimer", $this->InstanceID);
 			IPS_DeleteEvent($eid);
 		}
 	}
