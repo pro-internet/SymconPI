@@ -1,7 +1,7 @@
 {
   "elements":
   [
-	{ "type": "SelectInstance", "caption": "Heating", "name": "Stellmotor" },
+	{ "type": "SelectVariable", "caption": "Heating", "name": "Stellmotor" },
 	{ "type": "SelectVariable", "caption": "Current Value", "name": "IstWert" }
   ]
 }

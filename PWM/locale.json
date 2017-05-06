@@ -1,7 +1,8 @@
 {
 	"translations": {
 		"de": { 
-			"Ist-Wert": "Is-Value"
+			"Current Value": "Ist-Wert",
+			"Heating": "Stellmotor"
 		}
 	}
 }
