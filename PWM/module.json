@@ -1,0 +1,14 @@
+{
+    "id": "{620970fb-43cb-483b-91e8-9ff5f1c56a5f}",
+    "name": "PWM",
+    "type": 3,
+    "vendor": "prointernet",
+    "aliases": 
+    [
+        "PWM"
+    ],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "PWM"
+}
