@@ -190,12 +190,13 @@ if (\$IPS_SENDER == \"WebFront\")
 
 		$sid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 		$data = json_decode($this->ReadPropertyString("Raeume"));
-		if($data[0]->Stellmotor > 9999 && $data[0]->Istwert > 9999)
+		if(@$data[0]->Stellmotor > 9999 && @$data[0]->Istwert > 9999)
 		{
 			//Räume (Dummy Module) erstellen
 			foreach($data as $i => $list)
 			{	
-				if(@IPS_GetObjectIDByIdent("Raum$i", $this->InstanceID) === false)
+			echo "Raum$i";
+				if(@IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID)) === false)
 				{
 					$insID = IPS_CreateInstance($dummyGUID);
 					IPS_SetName($insID, $list->Raumname);
@@ -205,7 +206,8 @@ if (\$IPS_SENDER == \"WebFront\")
 				}
 				else
 				{
-					$insID = IPS_GetObjectIDByIdent("Raum$i", $this->InstanceID);
+					$insID = IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID));
+					IPS_SetName($insID, $list->Raumname);
 				}
 				
 				//Soll-Wert Variable erstellen
