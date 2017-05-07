@@ -408,7 +408,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			if($oeffnungszeit <= $var['oeffnungszeit'])
 			{
 				$this->setValueHeating(false, $data[$i]->Stellmotor);
-				"Heizung Stellmotor zu!";
+				//"Heizung Stellmotor zu!";
 			}
 			else
 			{
@@ -423,7 +423,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				IPS_SetEventActive($eid, true);
 				IPS_SetHidden($eid, false);
 				
-				"Heizung Stellmotor auf für $oeffnungszeit Minuten";
+				//"Heizung Stellmotor auf für $oeffnungszeit Minuten";
 			}
 		}
 	}
