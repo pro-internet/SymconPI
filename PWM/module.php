@@ -314,6 +314,8 @@ if (\$IPS_SENDER == \"WebFront\")
 		$data = (array) json_decode(GetValue($dataID));
 		$data[$selectValue] = array("value" => GetValue($sollID), "name" => $o['ObjectName']);
 		$data = json_encode($data);
+		$profile = IPS_GetVariable($selectID)['VariableCustomProfile'];
+		IPS_SetVariableProfileAssociation($profile, $selectValue, $o['ObjectName'], "", -1);
 		SetValue($dataID, $data);
 		$this->refresh();
 	}
