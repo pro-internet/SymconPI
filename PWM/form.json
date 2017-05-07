@@ -1,7 +1,7 @@
 {
   "elements":
   [
-	{ "type": "SelectVariable", "caption": "Heating", "name": "Stellmotor" },
-	{ "type": "SelectVariable", "caption": "Current Value", "name": "IstWert" }
+	{ "type": "Label", "label": "*Select the Variable holding the Value for the current Temperature"},
+	{ "type": "SelectVariable", "caption": "Sensor", "name": "IstWert" }
   ]
 }

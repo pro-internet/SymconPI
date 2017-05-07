@@ -113,7 +113,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetVariableProfileAssociation("PWM.Selector", 0, "Standard", "", -1);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 1, "Komfort", "", -1);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 2, "Reduziert", "", -1);
-			IPS_SetVariableProfileAssociation("PWM.Selector", 3, "Solar", "", -1);
+			IPS_SetVariableProfileAssociation("PWM.Selector", 3, "Solar/PV", "", -1);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 4, "Urlaub", "", -1);
 		}
 		
@@ -143,7 +143,7 @@ if (\$IPS_SENDER == \"WebFront\")
 		if(@IPS_GetObjectIDByIdent("IntervalVar",$this->InstanceID) === false)
 		{
 			$vid = $this->CreateVariable(2,"Interval","IntervalVar","PWM.Minutes",$sid);
-			SetValue($vid,1);
+			SetValue($vid,10);
 		}
 		else
 		{
@@ -214,6 +214,14 @@ if (\$IPS_SENDER == \"WebFront\")
 		{
 			$vid = $this->CreateVariable(3,"Sollwerte.Data", "SollwertData", "", $sid);
 			IPS_SetHidden($vid,true);
+			
+			$data[0] = array("value" => 0, "name" => "Standard");
+			$data[1] = array("value" => 0, "name" => "Komfort");
+			$data[2] = array("value" => 0, "name" => "Reduziert");
+			$data[3] = array("value" => 0, "name" => "Solar/PV");
+			$data[4] = array("value" => 0, "name" => "Urlaub");
+			$d = json_encode($data);
+			SetValue($vid, $d);
 		}
 	}
 
@@ -298,11 +306,13 @@ if (\$IPS_SENDER == \"WebFront\")
 	////////////////////
 	public function sollwertRefresh()
 	{
+		$selectID = IPS_GetObjectIDByIdent("SelectorVar",$this->InstanceID);
 		$sollID = IPS_GetObjectIDByIdent("SollwertVar",$this->InstanceID);
 		$dataID = IPS_GetObjectIDByIdent("SollwertData", $this->InstanceID);
+		$selectValue = GetValue($selectID);
 		$o = IPS_GetObject($sollID);
-		$data = json_decode(GetValue($dataID));
-		$data[$o['ObjectIdent']] = array("value" => GetValue($solID), "name" => $o['ObjectName']);
+		$data = (array) json_decode(GetValue($dataID));
+		$data[$selectValue] = array("value" => GetValue($sollID), "name" => $o['ObjectName']);
 		$data = json_encode($data);
 		SetValue($dataID, $data);
 		$this->refresh();
@@ -367,11 +377,10 @@ if (\$IPS_SENDER == \"WebFront\")
 		$sollID = IPS_GetObjectIDByIdent("SollwertVar",$this->InstanceID);
 		$dataID = IPS_GetObjectIDByIdent("SollwertData", $this->InstanceID);
 		$selectValue = GetValue($selectID);
-		$selectProfile = IPS_GetVariableProfile(IPS_SetVariableCustomProfile($selectID));
-		IPS_SetIdent($sollID, "$selectValue");
-		$data = json_decode(GetValue($dataID));
-		IPS_SetValue($sollID, $data["$selectValue"]['value']);
-		IPS_SetName($sollID, $data["$selectValue"]['name']);
+		$selectProfile = IPS_GetVariableProfile(IPS_GetVariable($selectID)['VariableCustomProfile']);
+		$data = (array) json_decode(GetValue($dataID));
+		SetValue($sollID, $data[$selectValue]->value);
+		IPS_SetName($sollID, $data[$selectValue]->name);
 	}
 	
 	public function heatingOff()
