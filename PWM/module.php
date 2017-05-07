@@ -195,11 +195,14 @@ if (\$IPS_SENDER == \"WebFront\")
 			//Räume (Dummy Module) erstellen
 			foreach($data as $i => $list)
 			{	
-				$insID = IPS_CreateInstance($dummyGUID);
-				IPS_SetName($insID, $list->Raumname);
-				IPS_SetParent($insID, IPS_GetParent($this->InstanceID));
-				IPS_SetPosition($insID, $i + 1);
-				IPS_SetIdent($insID, "Raum$i");
+				if(@IPS_GetObjectIDByIdent("Raum$i", $$this->InstanceID) === false)
+				{
+					$insID = IPS_CreateInstance($dummyGUID);
+					IPS_SetName($insID, $list->Raumname);
+					IPS_SetParent($insID, IPS_GetParent($this->InstanceID));
+					IPS_SetPosition($insID, $i + 1);
+					IPS_SetIdent($insID, "Raum$i");
+				}
 				
 				//Soll-Wert Variable erstellen
 				if(@IPS_GetObjectIDByIdent("SollwertVar",$insID) === false)
