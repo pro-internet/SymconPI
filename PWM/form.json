@@ -1,7 +1,47 @@
 {
   "elements":
   [
-	{ "type": "Label", "label": "*Select the Variable holding the Value for the current Temperature"},
-	{ "type": "SelectVariable", "caption": "Sensor", "name": "IstWert" }
+	{
+		"type": "List",
+		"name": "Raeume",
+		"caption": "Räume:",
+		"rowCount": 5,
+		"add": true,
+		"delete": true,
+		"sort": {
+			"column": "name",
+			"direction": "ascending"
+		},
+		"columns": [{
+			"label": "Raumname",
+			"name": "Raumname", 
+			"width": "75px",
+			"add": "",
+			"edit": {
+				"type": "ValidationTextBox"
+			}
+		}, {
+			"label": "Stellmotor",
+			"name": "Stellmotor",
+			"width": "75px",
+			"add": 0,
+			"edit": {
+				"type": "SelectVariable"
+			}
+		}, {
+			"label": "Ist-wert",
+			"name": "Istwert",
+			"width": "75px",
+			"add": 0,
+			"edit": {
+				"type": "SelectVariable"
+			}
+		}],
+		"values": [{
+			"Raumname": "String",
+			"Stellmotor": "Variable",
+			"Istwert": "Variable"
+		}]
+	}
   ]
 }
