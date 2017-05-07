@@ -203,6 +203,10 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetPosition($insID, $i + 1);
 					IPS_SetIdent($insID, "Raum$i");
 				}
+				else
+				{
+					$insID = IPS_GetObjectIDByIdent("Raum$i", $this->InstanceID);
+				}
 				
 				//Soll-Wert Variable erstellen
 				if(@IPS_GetObjectIDByIdent("SollwertVar",$insID) === false)
