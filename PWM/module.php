@@ -190,7 +190,7 @@ if (\$IPS_SENDER == \"WebFront\")
 
 		$sid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 		$data = json_decode($this->ReadPropertyString("Raeume"));
-		if(count($data) > 1 || (@$data[0]->Stellmotor > 9999 && @$data[0]->Istwert > 9999))
+		if($data[0]->Stellmotor > 9999 && $data[0]->Istwert > 9999)
 		{
 			//Räume (Dummy Module) erstellen
 			foreach($data as $i => $list)
