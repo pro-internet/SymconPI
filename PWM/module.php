@@ -190,7 +190,6 @@ if (\$IPS_SENDER == \"WebFront\")
 
 		$sid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 		$data = json_decode($this->ReadPropertyString("Raeume"));
-		print_r($data);
 		if(count($data) > 1 || (@$data[0]->Stellmotor > 9999 && @$data[0]->Istwert > 9999))
 		{
 			//Räume (Dummy Module) erstellen
@@ -266,6 +265,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				{
 					$vid = $this->CreateVariable(2,"Komfort", "KomfortVar", "PWM.Celsius", $sid, $insID);
 					IPS_SetPosition($vid, 2);
+					SetValue($vid, 21);
 				}
 				
 				//Soll-Wert Reduziert Variable erstellen
@@ -273,6 +273,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				{
 					$vid = $this->CreateVariable(2,"Reduziert", "ReduziertVar", "PWM.Celsius", $sid, $insID);
 					IPS_SetPosition($vid, 3);
+					SetValue($vid, 21);
 				}
 				
 				//Soll-Wert Urlaub Variable erstellen
@@ -280,6 +281,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				{
 					$vid = $this->CreateVariable(2,"Urlaub", "UrlaubVar", "PWM.Celsius", $sid, $insID);
 					IPS_SetPosition($vid, 4);
+					SetValue($vid, 21);
 				}
 				
 				//Soll-Wert Solar Variable erstellen
@@ -287,6 +289,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				{
 					$vid = $this->CreateVariable(2,"Solar", "SolarVar", "PWM.Celsius", $sid, $insID);
 					IPS_SetPosition($vid, 5);
+					SetValue($vid, 21);
 				}
 			}
 		}
@@ -316,7 +319,6 @@ if (\$IPS_SENDER == \"WebFront\")
 				if($actionID < 10000)
 				{
 					SetValue($id,$value);
-					continue;
 				}
 			if(IPS_InstanceExists($actionID)) 
 			{
@@ -369,21 +371,17 @@ if (\$IPS_SENDER == \"WebFront\")
 	public function refresh()
 	{
 		$data = json_decode($this->ReadPropertyString("Raeume"));
+		$var = array();
+		$var['trigger'] = GetValue(IPS_GetObjectIDByIdent("TriggerVar", $this->InstanceID));
+		$var['interval'] = GetValue(IPS_GetObjectIDByIdent("IntervalVar", $this->InstanceID));
+		$var['oeffnungszeit'] = GetValue(IPS_GetObjectIDByIdent("OeffnungszeitVar", $this->InstanceID));
+		if($var['trigger'] == 0)
+				$var['trigger'] = 0.1;
 		for($i = 0; $i < count($data); $i++)
 		{
 			$insID = IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID));
-			$var['istwert'] = IPS_GetObjectIDByIdent($data[$i]->Istwert, $insID);
-			$var['sollwert'] = IPS_GetObjectIDByIdent("SollwertVar", $insID);
-			$var['trigger'] = IPS_GetObjectIDByIdent("TriggerVar", $this->InstanceID);
-			$var['interval'] = IPS_GetObjectIDByIdent("IntervalVar", $this->InstanceID);
-			$var['oeffnungszeit'] = IPS_GetObjectIDByIdent("OeffnungszeitVar", $this->InstanceID);
-		
-			foreach($var as $i => $v)
-			{
-				$var[$i] = GetValue($v);
-			}
-			if($var['trigger'] == 0)
-				$var['trigger'] = 0.1;
+			$var['istwert'] = GetValue($data[$i]->Istwert);
+			$var['sollwert'] = GetValue(IPS_GetObjectIDByIdent("SollwertVar", $insID));
 			
 			$eName = "Nächste Aktuallisierung";
 			$eIdent = "refreshTimer";
@@ -401,7 +399,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			if($oeffnungszeit <= $var['oeffnungszeit'])
 			{
 				$this->setValueHeating(false, $data[$i]->Stellmotor);
-				//"Heizung Stellmotor zu!";
+				"Heizung Stellmotor zu!";
 			}
 			else
 			{
@@ -416,7 +414,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				IPS_SetEventActive($eid, true);
 				IPS_SetHidden($eid, false);
 				
-				//"Heizung Stellmotor auf für $oeffnungszeit Minuten";
+				"Heizung Stellmotor auf für $oeffnungszeit Minuten";
 			}
 		}
 	}
