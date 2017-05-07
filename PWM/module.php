@@ -20,7 +20,8 @@ class PWM extends IPSModule {
 		IPS_SetIdent($vid,$ident);
 		IPS_SetPosition($vid,$position);
 		IPS_SetVariableCustomProfile($vid,$profile);
-		IPS_SetVariableCustomAction($vid,$actionID);
+		if($actionID > 9999)
+			IPS_SetVariableCustomAction($vid,$actionID);
 		SetValue($vid,$initVal);
 		
 		return $vid;
@@ -49,22 +50,32 @@ class PWM extends IPSModule {
 		//Never delete this line!
 		parent::Create();
 
-		if(@$this->RegisterPropertyInteger("Stellmotor") !== false)
+		if(@$this->RegisterPropertyString("Raeume") !== false)
 		{
-			$this->RegisterPropertyInteger("Stellmotor",0);
-			$this->RegisterPropertyInteger("IstWert",0);
+			$this->RegisterPropertyString("Raeume","");
 		}
 		
-		//Ist-Wert onChange Event
-		if(@IPS_GetObjectIDByIdent("IstwertOnChange", $this->InstanceID) === false)
+		IPS_SetIdent($this->InstanceID, "PWMMainInstance");
+		//°C Profil erstellen
+		if(!IPS_VariableProfileExists("PWM.Celsius"))
 		{
-			$eid = IPS_CreateEvent(0);
-			IPS_SetParent($eid, $this->InstanceID);
-			IPS_SetName($eid, "Istwert onChange");
-			IPS_SetIdent($eid, "IstwertOnChange");
-			IPS_SetEventTrigger($eid, 1, $this->ReadPropertyInteger("IstWert"));
-			IPS_SetEventScript($eid, "PWM_refresh(". $this->InstanceID .");");
-			IPS_SetEventActive($eid, true);
+			$this->CreateProfile("PWM.Celsius", 2, 0, 40, 0.1, 1, "", "°C");
+		}
+		
+		//Min. Profil erstellen
+		if(!IPS_VariableProfileExists("PWM.Minutes"))
+		{
+			$this->CreateProfile("PWM.Minutes", 2, 0, 40, 0.1, 1, "", " Min.");
+		}
+		
+		//Selector Profil erstellen
+		if(!IPS_VariableProfileExists("PWM.Selector"))
+		{
+			$this->CreateProfile("PWM.Selector", 1, 0, 3, 1, 0);
+			IPS_SetVariableProfileAssociation("PWM.Selector", 0, "Komfort", "", -1);
+			IPS_SetVariableProfileAssociation("PWM.Selector", 1, "Reduziert", "", -1);
+			IPS_SetVariableProfileAssociation("PWM.Selector", 2, "Solar/PV", "", -1);
+			IPS_SetVariableProfileAssociation("PWM.Selector", 3, "Urlaub", "", -1);
 		}
 		
 		//SetValueScript erstellen
@@ -83,38 +94,6 @@ if (\$IPS_SENDER == \"WebFront\")
 } 
 
 ?>");
-		}
-		
-		//Targets Kategorie erstellen
-		if(@IPS_GetObjectIDByIdent("TargetsCat", $this->InstanceID) === false)
-		{
-			$cid = IPS_CreateCategory();
-			IPS_SetParent($cid, $this->InstanceID);
-			IPS_SetName($cid, "Targets");
-			IPS_SetIdent($cid, "TargetsCat");
-		}
-		
-		//°C Profil erstellen
-		if(!IPS_VariableProfileExists("PWM.Celsius"))
-		{
-			$this->CreateProfile("PWM.Celsius", 2, 0, 40, 0.1, 1, "", "°C");
-		}
-		
-		//Min. Profil erstellen
-		if(!IPS_VariableProfileExists("PWM.Minutes"))
-		{
-			$this->CreateProfile("PWM.Minutes", 2, 0, 40, 0.1, 1, "", " Min.");
-		}
-		
-		//Selector Profil erstellen
-		if(!IPS_VariableProfileExists("PWM.Selector"))
-		{
-			$this->CreateProfile("PWM.Selector", 1, 0, 4, 1, 0);
-			IPS_SetVariableProfileAssociation("PWM.Selector", 0, "Standard", "", -1);
-			IPS_SetVariableProfileAssociation("PWM.Selector", 1, "Komfort", "", -1);
-			IPS_SetVariableProfileAssociation("PWM.Selector", 2, "Reduziert", "", -1);
-			IPS_SetVariableProfileAssociation("PWM.Selector", 3, "Solar/PV", "", -1);
-			IPS_SetVariableProfileAssociation("PWM.Selector", 4, "Urlaub", "", -1);
 		}
 		
 		//Trigger Variable erstellen
@@ -169,32 +148,10 @@ if (\$IPS_SENDER == \"WebFront\")
 			SetValue($vid,1);
 		}
 		
-		//Soll-Wert Variable erstellen
-		if(@IPS_GetObjectIDByIdent("SollwertVar",$this->InstanceID) === false)
-		{
-			$vid = $this->CreateVariable(2,"Standard", "SollwertVar", "PWM.Celsius", $sid);
-		}
-		else
-		{
-			$vid = IPS_GetObjectIDByIdent("SollwertVar",$this->InstanceID);
-		}
-		
-		//Soll-Wert onChange Event
-		if(@IPS_GetObjectIDByIdent("SollwertOnChange", $this->InstanceID) === false)
-		{
-			$eid = IPS_CreateEvent(0);
-			IPS_SetParent($eid, $this->InstanceID);
-			IPS_SetName($eid, "Sollwert onChange");
-			IPS_SetIdent($eid, "SollwertOnChange");
-			IPS_SetEventTrigger($eid, 1, $vid);
-			IPS_SetEventScript($eid, "PWM_sollwertRefresh(". $this->InstanceID .");");
-			IPS_SetEventActive($eid, true);
-		}
-		
 		//Selector für die Soll-Werte erstellen
 		if(@IPS_GetObjectIDByIdent("SelectorVar",$this->InstanceID) === false)
 		{
-			$vid = $this->CreateVariable(1,"Sollwert", "SelectorVar", "PWM.Selector", $sid);
+			$vid = $this->CreateVariable(1,"Selector", "SelectorVar", "PWM.Selector", $sid);
 		}
 		
 		//Selector onChange
@@ -205,23 +162,8 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetName($eid, "Selector onChange");
 			IPS_SetIdent($eid, "SelectorOnChange");
 			IPS_SetEventTrigger($eid, 1, $vid);
-			IPS_SetEventScript($eid, "PWM_selectSollwert(". $this->InstanceID .");");
+			IPS_SetEventScript($eid, "PWM_selectorOnChange(". $this->InstanceID .");");
 			IPS_SetEventActive($eid, true);
-		}
-		
-		//Sollwerte Data Variable erstellen
-		if(@IPS_GetObjectIDByIdent("SollwertData", $this->InstanceID) === false)
-		{
-			$vid = $this->CreateVariable(3,"Sollwerte.Data", "SollwertData", "", $sid);
-			IPS_SetHidden($vid,true);
-			
-			$data[0] = array("value" => 0, "name" => "Standard");
-			$data[1] = array("value" => 0, "name" => "Komfort");
-			$data[2] = array("value" => 0, "name" => "Reduziert");
-			$data[3] = array("value" => 0, "name" => "Solar/PV");
-			$data[4] = array("value" => 0, "name" => "Urlaub");
-			$d = json_encode($data);
-			SetValue($vid, $d);
 		}
 	}
 
@@ -234,69 +176,155 @@ if (\$IPS_SENDER == \"WebFront\")
 	public function ApplyChanges() {
 		//Never delete this line!
 		parent::ApplyChanges();
-		
-		//Ist-Wert onChange Event
-		if(@IPS_GetObjectIDByIdent("IstwertOnChange", $this->InstanceID) === false)
+
+		$moduleList = IPS_GetModuleList();
+		$dummyGUID = ""; //init
+		foreach($moduleList as $l)
 		{
-			$eid = IPS_CreateEvent(0);
-			IPS_SetParent($eid, $this->InstanceID);
-			IPS_SetName($eid, "Istwert onChange");
-			IPS_SetIdent($eid, "IstwertOnChange");
-			IPS_SetEventTrigger($eid, 1, $this->ReadPropertyInteger("IstWert"));
-			IPS_SetEventScript($eid, "PWM_refresh(". $this->InstanceID .");");
-			IPS_SetEventActive($eid, true);
+			if(IPS_GetModule($l)['ModuleName'] == "Dummy Module")
+			{
+				$dummyGUID = $l;
+				break;
+			}
 		}
-		else
+
+		$sid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
+		$data = json_decode($this->ReadPropertyString("Raeume"));
+		print_r($data);
+		if(count($data) > 1 || (@$data[0]->Stellmotor > 9999 && @$data[0]->Istwert > 9999))
 		{
-			$eid = IPS_GetObjectIDByIdent("IstwertOnChange", $this->InstanceID);
-			IPS_SetEventTrigger($eid, 1, $this->ReadPropertyInteger("IstWert"));
+			//Räume (Dummy Module) erstellen
+			foreach($data as $i => $list)
+			{	
+				$insID = IPS_CreateInstance($dummyGUID);
+				IPS_SetName($insID, $list->Raumname);
+				IPS_SetParent($insID, IPS_GetParent($this->InstanceID));
+				IPS_SetPosition($insID, $i + 1);
+				IPS_SetIdent($insID, "Raum$i");
+				
+				//Soll-Wert Variable erstellen
+				if(@IPS_GetObjectIDByIdent("SollwertVar",$insID) === false)
+				{
+					$vid = $this->CreateVariable(2,"Soll", "SollwertVar", "PWM.Celsius", 0, $insID);
+					IPS_SetPosition($vid, 1);
+				}
+				else
+				{
+					$vid = IPS_GetObjectIDByIdent("SollwertVar", $insID);
+				}
+				
+				//Soll-Wert onChange Event
+				if(@IPS_GetObjectIDByIdent("SollwertOnChange", $insID) === false)
+				{
+					$eid = IPS_CreateEvent(0);
+					IPS_SetParent($eid, $insID);
+					IPS_SetPosition($eid, 99);
+					IPS_SetName($eid, "Sollwert onChange");
+					IPS_SetIdent($eid, "SollwertOnChange");
+					IPS_SetEventTrigger($eid, 1, $vid);
+					IPS_SetEventScript($eid, "PWM_selectorOnChange(". $this->InstanceID .");");
+					IPS_SetEventActive($eid, true);
+				}
+				
+				//Ist-Wert Link erstellen
+				if(@IPS_GetObjectIDByIdent("IstwertLink",$insID) === false)
+				{
+					$lid = IPS_CreateLink();
+					IPS_SetLinkTargetID($lid, $list->Istwert);
+					IPS_SetName($lid, IPS_GetName($list->Istwert));
+					IPS_SetParent($lid, $insID);
+					IPS_SetPosition($lid, 0);
+					IPS_SetIdent($lid, "IstwertLink");
+				}
+				
+				//Ist-Wert onChange Event
+				if(@IPS_GetObjectIDByIdent("IstwertOnChange", $insID) === false)
+				{
+					$eid = IPS_CreateEvent(0);
+					IPS_SetParent($eid, $insID);
+					IPS_SetPosition($eid, 99);
+					IPS_SetName($eid, "Istwert onChange");
+					IPS_SetIdent($eid, "IstwertOnChange");
+					IPS_SetEventTrigger($eid, 1, $list->Istwert);
+					IPS_SetEventScript($eid, "PWM_refresh(". $this->InstanceID .");");
+					IPS_SetEventActive($eid, true);
+				}
+				
+				//Stellmotor Link erstellen
+				if(@IPS_GetObjectIDByIdent("StellmotorLink",$insID) === false)
+				{
+					$lid = IPS_CreateLink();
+					IPS_SetLinkTargetID($lid, $list->Stellmotor);
+					IPS_SetName($lid, "Stellmotor");
+					IPS_SetParent($lid, $insID);
+					IPS_SetPosition($lid, 98);
+					IPS_SetIdent($lid, "StellmotorLink");
+				}
+				
+				//Soll-Wert Komfort Variable erstellen
+				if(@IPS_GetObjectIDByIdent("KomfortVar",$insID) === false)
+				{
+					$vid = $this->CreateVariable(2,"Komfort", "KomfortVar", "PWM.Celsius", $sid, $insID);
+					IPS_SetPosition($vid, 2);
+				}
+				
+				//Soll-Wert Reduziert Variable erstellen
+				if(@IPS_GetObjectIDByIdent("ReduziertVar",$insID) === false)
+				{
+					$vid = $this->CreateVariable(2,"Reduziert", "ReduziertVar", "PWM.Celsius", $sid, $insID);
+					IPS_SetPosition($vid, 3);
+				}
+				
+				//Soll-Wert Urlaub Variable erstellen
+				if(@IPS_GetObjectIDByIdent("UrlaubVar",$insID) === false)
+				{
+					$vid = $this->CreateVariable(2,"Urlaub", "UrlaubVar", "PWM.Celsius", $sid, $insID);
+					IPS_SetPosition($vid, 4);
+				}
+				
+				//Soll-Wert Solar Variable erstellen
+				if(@IPS_GetObjectIDByIdent("SolarVar",$insID) === false)
+				{
+					$vid = $this->CreateVariable(2,"Solar", "SolarVar", "PWM.Celsius", $sid, $insID);
+					IPS_SetPosition($vid, 5);
+				}
+			}
 		}
-		
-		$this->refresh();
 	}
 	
-	private function setValueHeating($value)
+	private function setValueHeating($value, $target)
 	{
-		$targets = IPS_GetObjectIDByIdent("TargetsCat", $this->InstanceID);
-		foreach(IPS_GetChildrenIDs($targets) as $target) 
+		if(IPS_VariableExists($target)) 
 		{
-			/*only allow links*/
-			if(IPS_LinkExists($target)) 
+			$type = IPS_GetVariable($target)['VariableType'];
+			$id = $target;
+			
+			$o = IPS_GetObject($id);
+			$v = IPS_GetVariable($id);
+			
+			if($v['VariableType'] == 0)
 			{
-				$linkVariableID = IPS_GetLink($target)['TargetID'];
-				if(IPS_VariableExists($linkVariableID)) 
+				$value = (bool) $value;
+			}
+			
+			if($v["VariableCustomAction"] > 0)
+				$actionID = $v["VariableCustomAction"];
+			else
+				$actionID = $v["VariableAction"];
+			
+			/*Skip this device if we do not have a proper id*/
+				if($actionID < 10000)
 				{
-					$type = IPS_GetVariable($linkVariableID)['VariableType'];
-					$id = $linkVariableID;
-					
-					$o = IPS_GetObject($id);
-					$v = IPS_GetVariable($id);
-					
-					if($v['VariableType'] == 0)
-					{
-						$value = (bool) $value;
-					}
-					
-					if($v["VariableCustomAction"] > 0)
-						$actionID = $v["VariableCustomAction"];
-					else
-						$actionID = $v["VariableAction"];
-					
-					/*Skip this device if we do not have a proper id*/
-						if($actionID < 10000)
-						{
-							SetValue($id,$value);
-							continue;
-						}
-					if(IPS_InstanceExists($actionID)) 
-					{
-						IPS_RequestAction($actionID, $o["ObjectIdent"], $value);
-					}
-					else if(IPS_ScriptExists($actionID))
-					{
-						echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value, "SENDER" => "WebFront"));
-					}
+					SetValue($id,$value);
+					continue;
 				}
+			if(IPS_InstanceExists($actionID)) 
+			{
+				IPS_RequestAction($actionID, $o["ObjectIdent"], $value);
+			}
+			else if(IPS_ScriptExists($actionID))
+			{
+				echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value, "SENDER" => "WebFront"));
 			}
 		}
 	}
@@ -304,32 +332,52 @@ if (\$IPS_SENDER == \"WebFront\")
 	////////////////////
 	//public functions//
 	////////////////////
-	public function sollwertRefresh()
+	public function selectorOnChange()
 	{
-		$selectID = IPS_GetObjectIDByIdent("SelectorVar",$this->InstanceID);
-		$sollID = IPS_GetObjectIDByIdent("SollwertVar",$this->InstanceID);
-		$dataID = IPS_GetObjectIDByIdent("SollwertData", $this->InstanceID);
-		$selectValue = GetValue($selectID);
-		$o = IPS_GetObject($sollID);
-		$data = (array) json_decode(GetValue($dataID));
-		$data[$selectValue] = array("value" => GetValue($sollID), "name" => $o['ObjectName']);
-		$data = json_encode($data);
-		$profile = IPS_GetVariable($selectID)['VariableCustomProfile'];
-		IPS_SetVariableProfileAssociation($profile, $selectValue, $o['ObjectName'], "", -1);
-		SetValue($dataID, $data);
+		$selectorID = IPS_GetObjectIDByIdent("SelectorVar", $this->InstanceID);
+		switch(GetValue($selectorID))
+		{
+			case(0):
+				$soll = "KomfortVar";
+				break;
+			case(1):
+				$soll = "ReduziertVar";
+				break;
+			case(2):
+				$soll = "SolarVar";
+				break;
+			case(3):
+				$soll = "UrlaubVar";
+				break;			
+		}
+		$dataCount = count(json_decode($this->ReadPropertyString("Raeume")));
+		for($i = 0; $i < $dataCount; $i++)
+		{
+			$insID = IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID));
+			$sollID = IPS_GetObjectIDByIdent("SollwertVar", $insID);
+			$sollSzene = IPS_GetObjectIDByIdent($soll, $insID);
+			$newSollwert = GetValue($sollSzene);
+			SetValue($sollID, $newSollwert);
+			
+			$eid = IPS_GetObjectIDByIdent("SollwertOnChange", $insID);
+			IPS_SetEventTrigger($eid, 1, $sollSzene);
+		}
+		
 		$this->refresh();
 	}
 	
 	public function refresh()
 	{
-		$var['istwert'] = $this->ReadPropertyInteger("IstWert");
-		if($var['istwert'] >= 10000)
-		{	
-			$var['istwert'] = $this->ReadPropertyInteger("IstWert");
-			$var['sollwert'] = IPS_GetObjectIDByIdent("SollwertVar", $this->InstanceID);
+		$data = json_decode($this->ReadPropertyString("Raeume"));
+		for($i = 0; $i < count($data); $i++)
+		{
+			$insID = IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID));
+			$var['istwert'] = IPS_GetObjectIDByIdent($data[$i]->Istwert, $insID);
+			$var['sollwert'] = IPS_GetObjectIDByIdent("SollwertVar", $insID);
 			$var['trigger'] = IPS_GetObjectIDByIdent("TriggerVar", $this->InstanceID);
 			$var['interval'] = IPS_GetObjectIDByIdent("IntervalVar", $this->InstanceID);
 			$var['oeffnungszeit'] = IPS_GetObjectIDByIdent("OeffnungszeitVar", $this->InstanceID);
+		
 			foreach($var as $i => $v)
 			{
 				$var[$i] = GetValue($v);
@@ -352,17 +400,17 @@ if (\$IPS_SENDER == \"WebFront\")
 			
 			if($oeffnungszeit <= $var['oeffnungszeit'])
 			{
-				$this->setValueHeating(false);
+				$this->setValueHeating(false, $data[$i]->Stellmotor);
 				//"Heizung Stellmotor zu!";
 			}
 			else
 			{
-				$this->setValueHeating(true);
+				$this->setValueHeating(true, $data[$i]->Stellmotor);
 				
 				$eName = "Heizung aus";
 				$eIdent = "heatingOffTimer";
-				$eScript = "PWM_heatingOff(". $this->InstanceID .");";
-				$eid = $this->CreateTimer($eName, $eIdent, $eScript);
+				$eScript = "PWM_heatingOff(". $this->InstanceID . "," . $data[$i]->Stellmotor .");";
+				$eid = $this->CreateTimer($eName, $eIdent, $eScript, $insID);
 				IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
 				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $oeffnungszeit * 60);
 				IPS_SetEventActive($eid, true);
@@ -373,21 +421,9 @@ if (\$IPS_SENDER == \"WebFront\")
 		}
 	}
 	
-	public function selectSollwert()
+	public function heatingOff($target)
 	{
-		$selectID = IPS_GetObjectIDByIdent("SelectorVar",$this->InstanceID);
-		$sollID = IPS_GetObjectIDByIdent("SollwertVar",$this->InstanceID);
-		$dataID = IPS_GetObjectIDByIdent("SollwertData", $this->InstanceID);
-		$selectValue = GetValue($selectID);
-		$selectProfile = IPS_GetVariableProfile(IPS_GetVariable($selectID)['VariableCustomProfile']);
-		$data = (array) json_decode(GetValue($dataID));
-		SetValue($sollID, $data[$selectValue]->value);
-		IPS_SetName($sollID, $data[$selectValue]->name);
-	}
-	
-	public function heatingOff()
-	{
-		$this->setValueHeating(false); //stellmotor aus
+		$this->setValueHeating(false, $target); //stellmotor aus
 		if(@IPS_GetObjectIDByIdent("heatingOffTimer", $this->InstanceID) !== false)
 		{
 			$eid = IPS_GetObjectIDByIdent("heatingOffTimer", $this->InstanceID);
