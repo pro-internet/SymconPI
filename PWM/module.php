@@ -195,7 +195,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			//Räume (Dummy Module) erstellen
 			foreach($data as $i => $list)
 			{	
-				if(@IPS_GetObjectIDByIdent("Raum$i", $$this->InstanceID) === false)
+				if(@IPS_GetObjectIDByIdent("Raum$i", $this->InstanceID) === false)
 				{
 					$insID = IPS_CreateInstance($dummyGUID);
 					IPS_SetName($insID, $list->Raumname);
