@@ -26,7 +26,7 @@
 			"width": "75px",
 			"add": 0,
 			"edit": {
-				"type": "SelectVariable"
+				"type": "SelectInstance"
 			}
 		}, {
 			"label": "Ist-wert",
@@ -39,7 +39,7 @@
 		}],
 		"values": [{
 			"Raumname": "String",
-			"Stellmotor": "Variable",
+			"Stellmotor": "InstanceID",
 			"Istwert": "Variable"
 		}]
 	}

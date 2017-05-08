@@ -59,7 +59,7 @@ class PWM extends IPSModule {
 		//°C Profil erstellen
 		if(!IPS_VariableProfileExists("PWM.Celsius"))
 		{
-			$this->CreateProfile("PWM.Celsius", 2, 0, 40, 0.1, 1, "", "°C");
+			$this->CreateProfile("PWM.Celsius", 2, 0, 40, 0.5, 1, "", "°C");
 		}
 		
 		//Min. Profil erstellen
@@ -105,6 +105,7 @@ if (\$IPS_SENDER == \"WebFront\")
 		{
 			$vid = IPS_GetObjectIDByIdent("TriggerVar",$this->InstanceID);
 		}
+		SetValue($vid, 1);
 
 		//Trigger Variable onChange Event
 		if(@IPS_GetObjectIDByIdent("TriggerOnChange", $this->InstanceID) === false)
@@ -406,12 +407,20 @@ if (\$IPS_SENDER == \"WebFront\")
 			
 			if($oeffnungszeit <= $var['oeffnungszeit'])
 			{
-				$this->setValueHeating(false, $data[$i]->Stellmotor);
+				//For Variable input
+				////$this->setValueHeating(false, $data[$i]->Stellmotor);
+				//just for KNX Devices
+				EIB_Switch($data[$i]->Stellmotor, false);
+				
 				//"Heizung Stellmotor zu!";
 			}
 			else
 			{
-				$this->setValueHeating(true, $data[$i]->Stellmotor);
+				echo "test";
+				//For Variable input
+				///$this->setValueHeating(true, $data[$i]->Stellmotor);
+				//just for KNX Devices
+				EIB_Switch($data[$i]->Stellmotor, true);
 				
 				$eName = "Heizung aus";
 				$eIdent = "heatingOffTimer";
@@ -429,7 +438,11 @@ if (\$IPS_SENDER == \"WebFront\")
 	
 	public function heatingOff($target)
 	{
-		$this->setValueHeating(false, $target); //stellmotor aus
+		//for variable input
+		////$this->setValueHeating(false, $target); //stellmotor aus
+		//just for KNX Devices
+		EIB_Switch($target, false);
+		
 		if(@IPS_GetObjectIDByIdent("heatingOffTimer", $this->InstanceID) !== false)
 		{
 			$eid = IPS_GetObjectIDByIdent("heatingOffTimer", $this->InstanceID);
