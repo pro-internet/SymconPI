@@ -464,8 +464,8 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetHidden($eid, false);
 			
 			$temperaturDifferenz = $var['sollwert'] - $var['istwert'];
-			$oeffnungszeit_prozent = (100 / $var['trigger']) * $temperaturDifferenz;
-			$oeffnungszeit = ($oeffnungszeit_prozent * $var['interval']) * 0.01; //Öffnungszeit in Minuten
+			$oeffnungszeit_prozent = $temperaturDifferenz / $var['trigger'];
+			$oeffnungszeit = $oeffnungszeit_prozent * $var['interval']; //Öffnungszeit in Minuten
 			
 			if($oeffnungszeit <= $var['oeffnungszeit'])
 			{
