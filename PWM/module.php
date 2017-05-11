@@ -46,6 +46,47 @@ class PWM extends IPSModule {
 		return $eid;
 	}
 
+	protected function DeleteObject($id)
+	{
+		if(IPS_HasChildren($id))
+		{
+			$childrenIDs = IPS_GetChildrenIDs($id);
+			foreach($childrenIDs as $chid)
+			{
+				$this->DeleteObject($chid);
+			}
+			$this->DeleteObject($id);
+		}
+		else
+		{
+			$type = IPS_GetObject($id)['ObjectType'];
+			switch($type)
+			{
+				case(0 /*kategorie*/):
+					IPS_DeleteCategory($id);
+					break;
+				case(1 /*Instanz*/):
+					IPS_DeleteInstance($id);
+					break;
+				case(2 /*Variable*/):
+					IPS_DeleteVariable($id);
+					break;
+				case(3 /*Skript*/):
+					IPS_DeleteScript($id,false /*move file to "Deleted" folder*/);
+					break;
+				case(4 /*Ereignis*/):
+					IPS_DeleteEvent($id);
+					break;
+				case(5 /*Media*/):
+					IPS_DeleteMedia($id);
+					break;
+				case(6 /*Link*/):
+					IPS_DeleteLink($id);
+					break;
+			}
+		}
+	}
+	
 	public function Create() {
 		//Never delete this line!
 		parent::Create();
@@ -198,17 +239,16 @@ if (\$IPS_SENDER == \"WebFront\")
 			{	
 				if(@IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID)) === false)
 				{
-					$insID = IPS_CreateInstance($dummyGUID);
-					IPS_SetName($insID, $list->Raumname);
-					IPS_SetParent($insID, IPS_GetParent($this->InstanceID));
-					IPS_SetPosition($insID, $i + 1);
-					IPS_SetIdent($insID, "Raum$i");
+					$insID = IPS_CreateInstance($dummyGUID);	
+					IPS_SetParent($insID, IPS_GetParent($this->InstanceID));					
 				}
 				else
 				{
 					$insID = IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID));
-					IPS_SetName($insID, $list->Raumname);
 				}
+				IPS_SetName($insID, $list->Raumname);
+				IPS_SetPosition($insID, $i + 1);
+				IPS_SetIdent($insID, "Raum$i");
 				
 				//Soll-Wert Variable erstellen
 				if(@IPS_GetObjectIDByIdent("SollwertVar",$insID) === false)
@@ -238,12 +278,16 @@ if (\$IPS_SENDER == \"WebFront\")
 				if(@IPS_GetObjectIDByIdent("IstwertLink",$insID) === false)
 				{
 					$lid = IPS_CreateLink();
-					IPS_SetLinkTargetID($lid, $list->Istwert);
-					IPS_SetName($lid, IPS_GetName($list->Istwert));
 					IPS_SetParent($lid, $insID);
-					IPS_SetPosition($lid, 0);
 					IPS_SetIdent($lid, "IstwertLink");
 				}
+				else
+				{
+					$lid = IPS_GetObjectIDByIdent("IstwertLink",$insID);
+				}
+				IPS_SetLinkTargetID($lid, $list->Istwert);
+				IPS_SetName($lid, IPS_GetName($list->Istwert));
+				IPS_SetPosition($lid, 0);
 				
 				//Ist-Wert onChange Event
 				if(@IPS_GetObjectIDByIdent("IstwertOnChange", $insID) === false)
@@ -253,21 +297,29 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetPosition($eid, 99);
 					IPS_SetName($eid, "Istwert onChange");
 					IPS_SetIdent($eid, "IstwertOnChange");
-					IPS_SetEventTrigger($eid, 1, $list->Istwert);
 					IPS_SetEventScript($eid, "PWM_refresh(". $this->InstanceID .");");
 					IPS_SetEventActive($eid, true);
 				}
+				else
+				{
+					$eid = IPS_GetObjectIDByIdent("IstwertOnChange", $insID);
+				}
+				IPS_SetEventTrigger($eid, 1, $list->Istwert);
 				
 				//Stellmotor Link erstellen
 				if(@IPS_GetObjectIDByIdent("StellmotorLink",$insID) === false)
 				{
 					$lid = IPS_CreateLink();
-					IPS_SetLinkTargetID($lid, $list->Stellmotor);
-					IPS_SetName($lid, "Stellmotor");
 					IPS_SetParent($lid, $insID);
-					IPS_SetPosition($lid, 98);
 					IPS_SetIdent($lid, "StellmotorLink");
 				}
+				else
+				{
+					$lid = IPS_GetObjectIDByIdent("StellmotorLink",$insID);
+				}
+				IPS_SetLinkTargetID($lid, $list->Stellmotor);
+				IPS_SetName($lid, "Stellmotor");
+				IPS_SetPosition($lid, 98);
 				
 				//Soll-Wert Komfort Variable erstellen
 				if(@IPS_GetObjectIDByIdent("KomfortVar",$insID) === false)
@@ -299,6 +351,16 @@ if (\$IPS_SENDER == \"WebFront\")
 					$vid = $this->CreateVariable(2,"Solar", "SolarVar", "PWM.Celsius", $sid, $insID);
 					IPS_SetPosition($vid, 5);
 					SetValue($vid, 21);
+				}
+			}
+			//lösche überschüssige räume
+			while($i < count(IPS_GetChildrenIDs(IPS_GetParent($this->InstanceID))))
+			{
+				$i++;
+				if(@IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID)) !== false)
+				{
+					$id = IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID));
+					$this->DeleteObject($id);
 				}
 			}
 		}
