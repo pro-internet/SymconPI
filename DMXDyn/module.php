@@ -18,7 +18,7 @@
             // Create Instance Vars
             $VarID_RWert = IPS_CreateVariable(1);
             IPS_SetName($VarID_RWert, "R Standart Wert");
-            IPS_SetParent($VarID_Raumtemperatur, $parent);
+            IPS_SetParent($VarID_RWert, $parent);
           
           /*
             $this->RegisterPropertyString("woeid", "701780");
