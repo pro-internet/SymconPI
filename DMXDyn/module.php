@@ -11,6 +11,10 @@
         public function Create() {
             // Don't delete this Row!
             parent::Create();
+
+
+            $rWert     = CreateVariable("rWert",      3 /*String*/,  $categoryId_DataValues,  140, '~String', $scriptId_Refresh, '');
+
           
           /*
             $this->RegisterPropertyString("woeid", "701780");
@@ -24,8 +28,8 @@
             parent::ApplyChanges();
         }
  
-        // Get the Weather Forcast for the Day!
-        public function ownFirstClass() {
+        // Own Function
+        public function ownFirstFunction() {
            
         }
     }
