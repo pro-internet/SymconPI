@@ -31,7 +31,7 @@
 
 
             // On Apply read Device List
-            $deviceList = $this->ReadPropertyString("Lichter");
+            $deviceList = IPS_GetProperty($parent, "Lichter"); 
             print_r($deviceList);
         }
 
