@@ -17,20 +17,22 @@
 
             // Create Instance Vars (RGBW & FadeWert)
             $vid = $this->CreateVariable(1,"R Standart Wert","VarID_RWert", $parent, 0, 0);
-
             $vid = $this->CreateVariable(1,"G Standart Wert","VarID_GWert", $parent, 1, 0);
-
             $vid = $this->CreateVariable(1,"B Standart Wert","VarID_BWert", $parent, 2, 0);
-
             $vid = $this->CreateVariable(1,"W Standart Wert","VarID_WWert", $parent, 3, 0);
-
             $vid = $this->CreateVariable(1, "Fade Standart Wert","VarID_FadeWert", $parent, 4, 0);
+
         }
  
         // Überschreibt die intere IPS_ApplyChanges($id) Funktion
         public function ApplyChanges() {
             // Don't delete this Row!
             parent::ApplyChanges();
+
+
+            // On Apply read Device List
+            $deviceList = $this->ReadPropertyString("Lichter");
+            print_r($deviceList);
         }
 
        protected function CreateVariable($type, $name, $ident, $parent, $position, $initVal){

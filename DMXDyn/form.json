@@ -1,8 +1,8 @@
 {
     "elements": [{
         "type": "List",
-        "name": "Geraete",
-        "caption": "Geräte:",
+        "name": "Lichter",
+        "caption": "Lichter:",
         "rowCount": 5,
         "add": true,
         "delete": true,
