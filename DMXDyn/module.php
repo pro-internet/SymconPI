@@ -31,6 +31,10 @@
             $VarID_WWert = IPS_CreateVariable(1);
             IPS_SetName($VarID_WWert, "W Standart Wert");
             IPS_SetParent($VarID_WWert, $parent);
+
+            $VarID_FadeWert = IPS_CreateVariable(1);
+            IPS_SetName($VarID_FadeWert, "Fade Standart Wert");
+            IPS_SetParent($VarID_FadeWert, $parent);
           
           /*
             $this->RegisterPropertyString("woeid", "701780");
