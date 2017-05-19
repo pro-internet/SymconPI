@@ -12,8 +12,8 @@
             // Don't delete this Row!
             parent::Create();
 
-            if($parent == "thisInstance")
-			    $parent = $this->InstanceID;
+
+			$parent = $this->InstanceID;
 
             // Create Instance Vars
             $VarID_RWert = IPS_CreateVariable(1);
