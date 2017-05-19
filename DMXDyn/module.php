@@ -16,9 +16,9 @@
 			$parent = $this->InstanceID;
 
             // Create Instance Vars (RGBW)
-            $VarID_RWert = IPS_CreateVariable(1);
+            /*$VarID_RWert = IPS_CreateVariable(1);
             IPS_SetName($VarID_RWert, "R Standart Wert");
-            IPS_SetParent($VarID_RWert, $parent);
+            IPS_SetParent($VarID_RWert, $parent);*/
 
             $VarID_GWert = IPS_CreateVariable(1);
             IPS_SetName($VarID_GWert, "G Standart Wert");
@@ -36,6 +36,9 @@
             IPS_SetName($VarID_FadeWert, "Fade Standart Wert");
             IPS_SetParent($VarID_FadeWert, $parent);
           
+
+            $vid = $this->CreateVariable(1,"R Standart Wert","VarID_RWert", $parent, 0, 0);
+
           /*
             $this->RegisterPropertyString("woeid", "701780");
             $this->RegisterPropertyString("Degree", "C");
@@ -46,6 +49,17 @@
         public function ApplyChanges() {
             // Don't delete this Row!
             parent::ApplyChanges();
+        }
+
+       protected function CreateVariable($type, $name, $ident, $parent, $position, $initVal){
+            $vid = IPS_CreateVariable($type);
+            IPS_SetName($vid,$name);
+            IPS_SetParent($vid,$parent);
+            IPS_SetIdent($vid,$ident);
+            IPS_SetPosition($vid,$position);
+            SetValue($vid,$initVal);
+            
+            return $vid;
         }
  
 
