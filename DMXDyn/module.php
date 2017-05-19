@@ -34,7 +34,7 @@
             $parent = $this->InstanceID;
 
             // On Apply read Device List
-            $deviceList = IPS_GetProperty($parent, "Lichter"); 
+            $deviceList = json_decode($this->ReadPropertyString("Lichter"));
             print_r($deviceList);
         }
 
