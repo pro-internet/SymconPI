@@ -15,34 +15,16 @@
 
 			$parent = $this->InstanceID;
 
-            // Create Instance Vars (RGBW)
-            /*$VarID_RWert = IPS_CreateVariable(1);
-            IPS_SetName($VarID_RWert, "R Standart Wert");
-            IPS_SetParent($VarID_RWert, $parent);*/
-
-            $VarID_GWert = IPS_CreateVariable(1);
-            IPS_SetName($VarID_GWert, "G Standart Wert");
-            IPS_SetParent($VarID_GWert, $parent);
-
-            $VarID_BWert = IPS_CreateVariable(1);
-            IPS_SetName($VarID_BWert, "B Standart Wert");
-            IPS_SetParent($VarID_BWert, $parent);
-
-            $VarID_WWert = IPS_CreateVariable(1);
-            IPS_SetName($VarID_WWert, "W Standart Wert");
-            IPS_SetParent($VarID_WWert, $parent);
-
-            $VarID_FadeWert = IPS_CreateVariable(1);
-            IPS_SetName($VarID_FadeWert, "Fade Standart Wert");
-            IPS_SetParent($VarID_FadeWert, $parent);
-          
-
+            // Create Instance Vars (RGBW & FadeWert)
             $vid = $this->CreateVariable(1,"R Standart Wert","VarID_RWert", $parent, 0, 0);
 
-          /*
-            $this->RegisterPropertyString("woeid", "701780");
-            $this->RegisterPropertyString("Degree", "C");
-          */
+            $vid = $this->CreateVariable(1,"G Standart Wert","VarID_GWert", $parent, 1, 0);
+
+            $vid = $this->CreateVariable(1,"B Standart Wert","VarID_BWert", $parent, 2, 0);
+
+            $vid = $this->CreateVariable(1,"W Standart Wert","VarID_WWert", $parent, 3, 0);
+
+            $vid = $this->CreateVariable(1, "Fade Standart Wert","VarID_FadeWert", $parent, 4, 0);
         }
  
         // Überschreibt die intere IPS_ApplyChanges($id) Funktion
