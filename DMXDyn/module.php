@@ -34,10 +34,11 @@
             $parent = $this->InstanceID;
 
             // On Apply read Device List
+            /*
             if(IPS_VariableExists($this->ReadPropertyInteger("Lichter"))){
                 $deviceList = json_decode($this->ReadPropertyString("Lichter"));
                 print_r($deviceList);
-            }
+            } */
            
 
         }
