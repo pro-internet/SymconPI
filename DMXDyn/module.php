@@ -2,6 +2,8 @@
     // Klassendefinition
     class DMXDyn extends IPSModule {
         
+        
+
         // Constructor
         public function __construct($InstanceID) {
             // Don't delete this Row!
@@ -12,8 +14,8 @@
             // Don't delete this Row!
             parent::Create();
 
-
-			$parent = $this->InstanceID;
+            $parent = $this->InstanceID;
+			
 
             // Create Instance Vars (RGBW & FadeWert)
             $vid = $this->CreateVariable(1,"R Standart Wert","VarID_RWert", $parent, 0, 0);
@@ -29,6 +31,7 @@
             // Don't delete this Row!
             parent::ApplyChanges();
 
+            $parent = $this->InstanceID;
 
             // On Apply read Device List
             $deviceList = IPS_GetProperty($parent, "Lichter"); 
