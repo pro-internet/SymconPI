@@ -36,11 +36,6 @@
 			"edit": {
 				"type": "SelectVariable"
 			}
-		}],
-		"values": [{
-			"Raumname": "String",
-			"Stellmotor": "InstanceID",
-			"Istwert": "Variable"
 		}]
 	}
   ]
