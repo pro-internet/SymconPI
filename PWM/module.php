@@ -481,7 +481,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			$oeffnungszeit_prozent = $temperaturDifferenz / $var['trigger'];
 			$oeffnungszeit = $oeffnungszeit_prozent * $var['interval']; //Öffnungszeit in Minuten
 			
-			if($oeffnungszeit <= $var['oeffnungszeit'])
+			if($oeffnungszeit <= $var['oeffnungszeit'] && $temperaturDifferenz < $var['trigger'])
 			{
 				//For Variable input
 				////$this->setValueHeating(false, $data[$i]->Stellmotor);
