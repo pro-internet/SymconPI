@@ -193,7 +193,7 @@ if (\$IPS_SENDER == \"WebFront\")
 		//Selector für die Soll-Werte erstellen
 		if(@IPS_GetObjectIDByIdent("SelectorVar",$this->InstanceID) === false)
 		{
-			$vid = $this->CreateVariable(1,"Selector", "SelectorVar", "PWM.Selector", $sid);
+			$vid = $this->CreateVariable(1,"Temperatur", "SelectorVar", "PWM.Selector", $sid);
 		}
 		
 		//Selector onChange
