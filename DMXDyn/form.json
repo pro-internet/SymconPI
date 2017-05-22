@@ -25,7 +25,7 @@
                 "width": "75px",
                 "add": 0,
                 "edit": {
-                    "type": "SelectInstance"
+                    "type": "SelectVariable"
                 }
             },
             {
