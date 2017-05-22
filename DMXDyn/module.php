@@ -19,14 +19,26 @@
             
             $parent = $this->InstanceID;
 
-            // Create Instance Vars (RGBW & FadeWert)
-            $vid = $this->CreateVariable(1,"R Standart Wert","VarID_RWert", $parent, 0, 0);
-            $vid = $this->CreateVariable(1,"G Standart Wert","VarID_GWert", $parent, 1, 0);
-            $vid = $this->CreateVariable(1,"B Standart Wert","VarID_BWert", $parent, 2, 0);
-            $vid = $this->CreateVariable(1,"W Standart Wert","VarID_WWert", $parent, 3, 0);
-            $vid = $this->CreateVariable(1, "Fade Standart Wert","VarID_FadeWert", $parent, 4, 0);
+            // Create Instance Profies
+            if(!IPS_VariableProfileExists("DMX.Dim")){
+			    $this->CreateProfile("DMX.Dim", 1, 0, 100, 1, 1, "", "%");
+		    }
+            if(!IPS_VariableProfileExists("DMX.Fade")){
+                $this->CreateProfile("DMX.Fade", 1, 0, 10, 1, 1, "", "s");
+            }
+            if(!IPS_VariableProfileExists("~Switch")){
+                $this->CreateProfile("~Switch", 0, 0, 1, 1, 1, "", "");
+            }
 
-            IPS_SetHidden($parent, true); //Objekt verstecken
+            // Create Instance Vars (RGBW & FadeWert)
+            // CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action)
+            $vid = $this->CreateVariable(1,"Global R","VarID_RWert", $parent, 0, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1,"Global G","VarID_GWert", $parent, 1, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1,"Global B","VarID_BWert", $parent, 2, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1,"Global W","VarID_WWert", $parent, 3, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1, "Global Fade","VarID_FadeWert", $parent, 4, 0, "DMX.Fade", "16562", false);
+
+            
         }
  
         // Überschreibt die intere IPS_ApplyChanges($id) Funktion
@@ -64,28 +76,44 @@
                     IPS_SetPosition($insID, $i + 1);
                     IPS_SetIdent($insID, "device$i");
 
-                    $vid = $this->CreateVariable(1,"R", "R", $insID, 0, 1);
-                    $vid = $this->CreateVariable(1,"G", "G", $insID, 1, 2);
-                    $vid = $this->CreateVariable(1,"B", "B", $insID, 2, 3);
-                    $vid = $this->CreateVariable(1,"W", "W", $insID, 3, 4);
-                    $vid = $this->CreateVariable(1,"Fade", "Fade", $insID, 4, 20);
+                    // Generate Values
+                    $vid = $this->CreateVariable(1,"R", "R", $insID, 1, 1, "DMX.Dim", "16562", TRUE);
+                    $vid = $this->CreateVariable(1,"G", "G", $insID, 2, 2, "DMX.Dim", "16562", TRUE);
+                    $vid = $this->CreateVariable(1,"B", "B", $insID, 3, 3, "DMX.Dim", "16562", TRUE);
+                    $vid = $this->CreateVariable(1,"W", "W", $insID, 4, 4, "DMX.Dim", "16562", TRUE);
+                    $vid = $this->CreateVariable(1,"Fade", "Fade", $insID, 5, 5, "DMX.Fade", "16562", TRUE);
+
+                    // Generate Switch
+                    $vid = $this->CreateVariable(0, "Switch", "Swtich", $insID, 0, 0, "~Switch", "16562", FALSE);
                 }
             }
 
         }
 
-       protected function CreateVariable($type, $name, $ident, $parent, $position, $initVal){
+       protected function CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action, $hide){
             $vid = IPS_CreateVariable($type);
             IPS_SetName($vid,$name);
             IPS_SetParent($vid,$parent);
             IPS_SetIdent($vid,$ident);
             IPS_SetPosition($vid,$position);
             SetValue($vid,$initVal);
-            
+            IPS_SetHidden($vid, $hide); //Objekt verstecken
+            if(!empty($profile)){
+                IPS_SetVariableCustomProfile($vid,$profile);
+            }
+            if(!empty($action)){
+                IPS_SetVariableCustomAction($vid,$action);
+            }
             return $vid;
-        }
- 
-
+       }
+        
+       protected function CreateProfile($profile, $type, $min, $max, $steps, $digits = 0, $prefix = "DMX", $suffix = "", $icon = ""){
+            IPS_CreateVariableProfile($profile, $type);
+            IPS_SetVariableProfileValues($profile, $min, $max, $steps);
+            IPS_SetVariableProfileText($profile, $prefix, $suffix);
+            IPS_SetVariableProfileDigits($profile, $digits);
+            IPS_SetVariableProfileIcon($profile, $icon);
+       }
 
         // Own Function
         public function ownFirstFunction() {
