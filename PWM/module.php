@@ -100,7 +100,7 @@ class PWM extends IPSModule {
 		//°C Profil erstellen
 		if(!IPS_VariableProfileExists("PWM.Celsius"))
 		{
-			$this->CreateProfile("PWM.Celsius", 2, 0, 40, 0.5, 1, "", "°C");
+			$this->CreateProfile("PWM.Celsius", 2, 0, 40, 0.5, 1, "", "°C", "Temperature");
 		}
 		
 		//Min. Profil erstellen
@@ -112,7 +112,7 @@ class PWM extends IPSModule {
 		//Selector Profil erstellen
 		if(!IPS_VariableProfileExists("PWM.Selector"))
 		{
-			$this->CreateProfile("PWM.Selector", 1, 0, 3, 1, 0);
+			$this->CreateProfile("PWM.Selector", 1, 0, 3, 0, 0);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 0, "Komfort", "", -1);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 1, "Reduziert", "", -1);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 2, "Solar/PV", "", -1);
@@ -232,7 +232,7 @@ if (\$IPS_SENDER == \"WebFront\")
 
 		$sid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 		$data = json_decode($this->ReadPropertyString("Raeume"));
-		if(@$data[0]->Stellmotor > 9999 && @$data[0]->Istwert > 9999)
+		if(@count($data) != 0)
 		{
 			//Räume (Dummy Module) erstellen
 			foreach($data as $i => $list)
@@ -317,7 +317,8 @@ if (\$IPS_SENDER == \"WebFront\")
 				{
 					$lid = IPS_GetObjectIDByIdent("StellmotorLink",$insID);
 				}
-				IPS_SetLinkTargetID($lid, $list->Stellmotor);
+				$statusVarID = IPS_GetChildrenIDs($list->Stellmotor);
+				IPS_SetLinkTargetID($lid, $statusVarID[0]);
 				IPS_SetName($lid, "Stellmotor");
 				IPS_SetPosition($lid, 98);
 				
@@ -484,7 +485,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				//just for KNX Devices
 				EIB_Switch($data[$i]->Stellmotor, true);
 				
-				$eName = "Heizung aus";
+				$eName = "Stellmotor aus";
 				$eIdent = "heatingOffTimer";
 				$eScript = "PWM_heatingOff(". $this->InstanceID . "," . $data[$i]->Stellmotor .");";
 				$eid = $this->CreateTimer($eName, $eIdent, $eScript, $insID);
