@@ -97,7 +97,7 @@
                     $vid = $this->CreateVariable(0, "Switch", "Swtich", $insID, 0, 0, "~Switch", "16562", FALSE);
                     
                     // Get Switch ID
-                    $triggerID = @IPS_GetVariableIDByName("Switch", $insID);
+                    $triggerID = IPS_GetVariableIDByName("Switch", $insID);
                     $vid = $this->CreateEventOn($insID, $triggerID);
                 }
             }
@@ -141,7 +141,7 @@
            // Set Name
            IPS_SetName($eid, "Trigger onChange");
            // Set Script 
-           IPS_SetEventScript($eid, "DMXDYN_refresh(". $this->InstanceID .", $triggerID);");
+           IPS_SetEventScript($eid, "DMXDYN_refresh(". $triggerID .");");
            // OnUpdate für Variable 12345
            IPS_SetEventTrigger($eid, 0, $triggerID);            
            IPS_SetEventActive($eid, true);
@@ -149,10 +149,11 @@
        }
 
         // Own Function
-        public function refresh($instanceID, $triggerID) {
+        public function refresh($triggerID) {
            // Anhand der TriggerID muss ich erkennen welcher der Parent ist und kann dann die Werte neu setzen
 
-           
+           echo "Yuhuuuuu";
+
 
         }
     }
