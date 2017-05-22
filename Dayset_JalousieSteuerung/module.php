@@ -1,5 +1,5 @@
 <?
-class TestModule extends IPSModule {
+class DaysetJalousie extends IPSModule {
 
 	public function Create() {
 		//Never delete this line!
