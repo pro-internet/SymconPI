@@ -100,7 +100,7 @@ class PWM extends IPSModule {
 		//°C Profil erstellen
 		if(!IPS_VariableProfileExists("PWM.Celsius"))
 		{
-			$this->CreateProfile("PWM.Celsius", 2, 0, 40, 0.5, 1, "", "°C", "Temperature");
+			$this->CreateProfile("PWM.Celsius", 2, 0, 40, 0.5, 1, "", " °C", "Temperature");
 		}
 		
 		//Min. Profil erstellen
@@ -140,7 +140,8 @@ if (\$IPS_SENDER == \"WebFront\")
 		//Trigger Variable erstellen
 		if(@IPS_GetObjectIDByIdent("TriggerVar",$this->InstanceID) === false)
 		{
-			$vid = $this->CreateVariable(2,"Trigger","TriggerVar","PWM.Celsius",$sid);
+			$vid = $this->CreateVariable(2,"Trigger - ","TriggerVar","PWM.Celsius",$sid);
+			IPS_SetHidden($vid, true);
 		}
 		else
 		{
@@ -188,6 +189,18 @@ if (\$IPS_SENDER == \"WebFront\")
 		{
 			$vid = $this->CreateVariable(2,"Minimale Öffnungszeit", "OeffnungszeitVar", "PWM.Minutes", $sid);
 			SetValue($vid,1);
+		}
+		
+		//Minimale Öffnungszeit refresh event
+		if(@IPS_GetObjectIDByIdent("MiniOeffnungEvent",$this->InstanceID) === false)
+		{
+			$eid = IPS_CreateEvent(0);
+			IPS_SetParent($eid, $this->InstanceID);
+			IPS_SetName($eid, "MiniOeffnung onChange");
+			IPS_SetIdent($eid, "MiniOeffnungOnChange");
+			IPS_SetEventTrigger($eid, 1, $vid);
+			IPS_SetEventScript($eid, "PWM_refresh(". $this->InstanceID .");");
+			IPS_SetEventActive($eid, true);
 		}
 		
 		//Selector für die Soll-Werte erstellen
@@ -290,21 +303,21 @@ if (\$IPS_SENDER == \"WebFront\")
 				IPS_SetPosition($lid, 0);
 				
 				//Ist-Wert onChange Event
-				if(@IPS_GetObjectIDByIdent("IstwertOnChange", $insID) === false)
-				{
-					$eid = IPS_CreateEvent(0);
-					IPS_SetParent($eid, $insID);
-					IPS_SetPosition($eid, 99);
-					IPS_SetName($eid, "Istwert onChange");
-					IPS_SetIdent($eid, "IstwertOnChange");
-					IPS_SetEventScript($eid, "PWM_refresh(". $this->InstanceID .");");
-					IPS_SetEventActive($eid, true);
-				}
-				else
-				{
-					$eid = IPS_GetObjectIDByIdent("IstwertOnChange", $insID);
-				}
-				IPS_SetEventTrigger($eid, 1, $list->Istwert);
+				// if(@IPS_GetObjectIDByIdent("IstwertOnChange", $insID) === false)
+				// {
+					// $eid = IPS_CreateEvent(0);
+					// IPS_SetParent($eid, $insID);
+					// IPS_SetPosition($eid, 99);
+					// IPS_SetName($eid, "Istwert onChange");
+					// IPS_SetIdent($eid, "IstwertOnChange");
+					// IPS_SetEventScript($eid, "PWM_refresh(". $this->InstanceID .");");
+					// IPS_SetEventActive($eid, true);
+				// }
+				// else
+				// {
+					// $eid = IPS_GetObjectIDByIdent("IstwertOnChange", $insID);
+				// }
+				// IPS_SetEventTrigger($eid, 1, $list->Istwert);
 				
 				//Stellmotor Link erstellen
 				if(@IPS_GetObjectIDByIdent("StellmotorLink",$insID) === false)
@@ -490,7 +503,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				$eScript = "PWM_heatingOff(". $this->InstanceID . "," . $data[$i]->Stellmotor .");";
 				$eid = $this->CreateTimer($eName, $eIdent, $eScript, $insID);
 				IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
-				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $oeffnungszeit * 60);
+				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $oeffnungszeit * 60 + 5);
 				IPS_SetEventActive($eid, true);
 				IPS_SetHidden($eid, false);
 				
