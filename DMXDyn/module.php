@@ -80,7 +80,7 @@
                     IPS_SetIdent($insID, "device$i");
 
                     $array = json_decode(json_encode($list),true);
-                    print_r($array['RChannel']['Value']);
+                    print_r($array['RChannel']);
 
                     $R = $array['RChannel'];
                     $G = $array['GChannel'];
@@ -187,6 +187,24 @@
            $getValueChannelW = GetValue($getChannelW);
            $getDevice        = IPS_GetParent($getValueChannelR);
 
+           // Get Ident 
+           $channelObjectR = IPS_GetObject($getValueChannelR);
+           $channelObjectG = IPS_GetObject($getValueChannelG);
+           $channelObjectB = IPS_GetObject($getValueChannelB);
+           $channelObjectW = IPS_GetObject($getValueChannelW);
+
+           // Get Channel Number
+           $channelStringR = $channelObjectR['ObjectIdent'];
+           $channelStringG = $channelObjectG['ObjectIdent'];
+           $channelStringB = $channelObjectB['ObjectIdent'];
+           $channelStringW = $channelObjectW['ObjectIdent'];
+
+           $channelNumberR = $this->getIntFromString($channelStringR);
+           $channelNumberG = $this->getIntFromString($channelStringG);
+           $channelNumberB = $this->getIntFromString($channelStringB);
+           $channelNumberW = $this->getIntFromString($channelStringW);
+        
+
            // Get Global ID`s
            $getGlobalR = IPS_GetVariableIDByName("GlobalR", $hauptInstanz);
            $getGlobalG = IPS_GetVariableIDByName("GlobalG", $hauptInstanz);
@@ -201,22 +219,28 @@
 
            // IF True Set Values
            $Switch = GetValue($triggerID);
-           echo $Switch;
+
            if($Switch == TRUE){
                 // Set Channel Values
-                DMX_FadeChannel($getDevice, $getValueChannelR, $getValueGlobalR, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $getValueChannelG, $getValueGlobalG, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $getValueChannelB, $getValueGlobalB, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $getValueChannelW, $getValueGlobalW, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $channelNumberR, $getValueGlobalR, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $channelNumberG, $getValueGlobalG, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $channelNumberB, $getValueGlobalB, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $channelNumberW, $getValueGlobalW, $FadeSpeed);
            }
            // IF False Set 0
             if($Switch == FALSE){
                 // Set Channel Values
-                DMX_FadeChannel($getDevice, $getValueChannelR, 0, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $getValueChannelG, 0, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $getValueChannelB, 0, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $getValueChannelW, 0, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $channelNumberR, 0, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $channelNumberG, 0, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $channelNumberB, 0, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $channelNumberW, 0, $FadeSpeed);
             }
+        }
+
+        protected function getIntFromString($string){
+            $matches = preg_replace('/\D/', '', $string);
+            print_r($matches);
+            return $matches;
         }
     }
 ?>
