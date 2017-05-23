@@ -171,17 +171,21 @@
         public function refresh($hauptInstanz, $insID, $triggerID) {
            // Anhand der TriggerID muss ich erkennen welcher der Parent ist und kann dann die Werte neu setzen
 
+           $FadeSpeed = 1.5;
+
            // Get Channel ID`s
            $getChannelR = IPS_GetVariableIDByName("R", $insID);
            $getChannelG = IPS_GetVariableIDByName("G", $insID);
            $getChannelB = IPS_GetVariableIDByName("B", $insID);
            $getChannelW = IPS_GetVariableIDByName("W", $insID);
+           
 
            // Get Channel Values
            $getValueChannelR = GetValue($getChannelR);
            $getValueChannelG = GetValue($getChannelG);
            $getValueChannelB = GetValue($getChannelB);
            $getValueChannelW = GetValue($getChannelW);
+           $getDevice        = IPS_GetParent($getValueChannelR);
 
            // Get Global ID`s
            $getGlobalR = IPS_GetVariableIDByName("GlobalR", $hauptInstanz);
@@ -200,18 +204,18 @@
            echo $Switch;
            if($Switch == TRUE){
                 // Set Channel Values
-                SetValue($getValueChannelR, $getValueGlobalR);
-                SetValue($getValueChannelG, $getValueGlobalG);
-                SetValue($getValueChannelB, $getValueGlobalB);
-                SetValue($getValueChannelW, $getValueGlobalW);
+                DMX_FadeChannel($getDevice, $getValueChannelR, $getValueGlobalR, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $getValueChannelG, $getValueGlobalG, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $getValueChannelB, $getValueGlobalB, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $getValueChannelW, $getValueGlobalW, $FadeSpeed);
            }
            // IF False Set 0
             if($Switch == FALSE){
                 // Set Channel Values
-                SetValue($getValueChannelR, 0);
-                SetValue($getValueChannelG, 0);
-                SetValue($getValueChannelB, 0);
-                SetValue($getValueChannelW, 0);
+                DMX_FadeChannel($getDevice, $getValueChannelR, 0, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $getValueChannelG, 0, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $getValueChannelB, 0, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $getValueChannelW, 0, $FadeSpeed);
             }
         }
     }
