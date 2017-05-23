@@ -20,7 +20,7 @@
 
             // Create Instance Profies
             if(!IPS_VariableProfileExists("DMX.Dim")){
-			    $this->CreateProfile("DMX.Dim", 1, 0, 120, 1, 1, "", "");
+			    $this->CreateProfile("DMX.Dim", 1, 0, 255, 1, 1, "", "%");
 		    }
             if(!IPS_VariableProfileExists("DMX.Channel")){
                 $this->CreateProfile("DMX.Channel", 1, 0, 100000, 1, 1, "", "");
