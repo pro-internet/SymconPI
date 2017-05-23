@@ -32,13 +32,30 @@
                 $this->CreateProfile("~Switch", 0, 0, 1, 1, 1, "", "");
             }
 
+
+            // Create SetValue Script
+            if(@IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID) === false){
+                $sid = IPS_CreateScript(0 /* PHP Script */);
+                IPS_SetParent($sid, $this->InstanceID);
+                IPS_SetName($sid, "SetValue");
+                IPS_SetIdent($sid, "SetValueScript");
+                IPS_SetHidden($sid, true);	
+                IPS_SetScriptContent($sid, "<?
+                if (\$IPS_SENDER == \"WebFront\"){ 
+                    SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']); 
+                } 
+                ?>");
+            }
+
+            $svs = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
+
             // Create Instance Vars (RGBW & FadeWert)
             // CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action)
-            $vid = $this->CreateVariable(1,"Global Rot","VarID_RWert", $parent, 0, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1,"Global Gruen","VarID_GWert", $parent, 1, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1,"Global Blau","VarID_BWert", $parent, 2, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1,"Global Weiss","VarID_WWert", $parent, 3, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(2, "Global Fade","VarID_FadeWert", $parent, 4, 0, "DMX.Fade", "16562", false);
+            $vid = $this->CreateVariable(1,"Global Rot","VarID_RWert", $parent, 0, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global Gruen","VarID_GWert", $parent, 1, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global Blau","VarID_BWert", $parent, 2, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global Weiss","VarID_WWert", $parent, 3, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(2, "Global Fade","VarID_FadeWert", $parent, 4, 0, "DMX.Fade", $svs, false);
 
             
         }
@@ -51,6 +68,7 @@
             $parent = $this->InstanceID;
             $hauptInstanz = $parent;
 
+            $svs = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 
             $moduleList = IPS_GetModuleList();
             $dummyGUID = ""; //init
@@ -106,14 +124,14 @@
                     }
 
                     // Generate Values
-                    $vid = $this->CreateVariable(1,"R", "R", $insID, 1, $R, "DMX.Channel", "16562", TRUE);
-                    $vid = $this->CreateVariable(1,"G", "G", $insID, 2, $G, "DMX.Channel", "16562", TRUE);
-                    $vid = $this->CreateVariable(1,"B", "B", $insID, 3, $B, "DMX.Channel", "16562", TRUE);
-                    $vid = $this->CreateVariable(1,"W", "W", $insID, 4, $W, "DMX.Channel", "16562", TRUE);
-                    $vid = $this->CreateVariable(2,"Fade", "Fade", $insID, 5, 5, "DMX.Fade", "16562", TRUE);
+                    $vid = $this->CreateVariable(1,"R", "R", $insID, 1, $R, "DMX.Channel", $svs, TRUE);
+                    $vid = $this->CreateVariable(1,"G", "G", $insID, 2, $G, "DMX.Channel", $svs, TRUE);
+                    $vid = $this->CreateVariable(1,"B", "B", $insID, 3, $B, "DMX.Channel", $svs, TRUE);
+                    $vid = $this->CreateVariable(1,"W", "W", $insID, 4, $W, "DMX.Channel", $svs, TRUE);
+                    $vid = $this->CreateVariable(2,"Fade", "Fade", $insID, 5, 5, "DMX.Fade", $svs, TRUE);
 
                     // Generate Switch
-                    $vid = $this->CreateVariable(0, "Switch", "Swtich", $insID, 0, 0, "~Switch", "16562", FALSE);
+                    $vid = $this->CreateVariable(0, "Switch", "Swtich", $insID, 0, 0, "~Switch", $svs, FALSE);
                     
                     // Get Switch ID
                     $triggerID = IPS_GetVariableIDByName("Switch", $insID);
