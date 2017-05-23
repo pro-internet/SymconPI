@@ -35,7 +35,7 @@
             // Create Instance Vars (RGBW & FadeWert)
             // CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action)
             $vid = $this->CreateVariable(1,"Global Rot","VarID_RWert", $parent, 0, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1,"Global Gelb","VarID_GWert", $parent, 1, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1,"Global Gruen","VarID_GWert", $parent, 1, 0, "DMX.Dim", "16562", false);
             $vid = $this->CreateVariable(1,"Global Blau","VarID_BWert", $parent, 2, 0, "DMX.Dim", "16562", false);
             $vid = $this->CreateVariable(1,"Global Weiss","VarID_WWert", $parent, 3, 0, "DMX.Dim", "16562", false);
             $vid = $this->CreateVariable(2, "Global Fade","VarID_FadeWert", $parent, 4, 0, "DMX.Fade", "16562", false);
@@ -265,7 +265,7 @@
 
            // Get Global ID`s
            $getGlobalR = IPS_GetVariableIDByName("Global Rot", $InstanceID);
-           $getGlobalG = IPS_GetVariableIDByName("Global Gelb", $InstanceID);
+           $getGlobalG = IPS_GetVariableIDByName("Global Gruen", $InstanceID);
            $getGlobalB = IPS_GetVariableIDByName("Global Blau", $InstanceID);
            $getGlobalW = IPS_GetVariableIDByName("Global Weiss", $InstanceID);
            $getGlobalF = IPS_GetVariableIDByName("Global Fade", $InstanceID);

@@ -56,13 +56,7 @@
                 }
             }
         ],
-        "values": [{
-            "Name": "String",
-            "RChannel": "InstanceID",
-            "GChannel": "InstanceID",
-            "BChannel": "InstanceID",
-            "WChannel": "InstanceID"
-        }],
+        "values": [{}],
         "actions": [{
             "type": "Button",
             "label": "Update",
