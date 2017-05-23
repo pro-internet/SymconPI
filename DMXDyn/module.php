@@ -87,6 +87,24 @@
                     $B = $array['BChannel'];
                     $W = $array['WChannel'];
 
+                    $isEmpty = @IPS_GetObjectIDByIdent("R", $insID);
+                    if(!empty($isEmpty)){
+                        $RV = IPS_GetVariableIDByName(  "R",      $insID);
+                        $GV = IPS_GetVariableIDByName(  "G",      $insID);
+                        $BV = IPS_GetVariableIDByName(  "B",      $insID);
+                        $WV = IPS_GetVariableIDByName(  "W",      $insID);
+                        $FV = IPS_GetVariableIDByName(  "Fade",   $insID);
+                        $SV = IPS_GetVariableIDByName(  "Switch", $insID);
+                        $EV = IPS_GetEventIDByName("TriggerOnChange",  $insID);
+                        IPS_DeleteVariable($RV);
+                        IPS_DeleteVariable($GV);
+                        IPS_DeleteVariable($BV);
+                        IPS_DeleteVariable($WV);
+                        IPS_DeleteVariable($FV);
+                        IPS_DeleteVariable($SV);
+                        IPS_DeleteEvent($EV);
+                    }
+
                     // Generate Values
                     $vid = $this->CreateVariable(1,"R", "R", $insID, 1, $R, "DMX.Channel", "16562", TRUE);
                     $vid = $this->CreateVariable(1,"G", "G", $insID, 2, $G, "DMX.Channel", "16562", TRUE);
@@ -138,9 +156,9 @@
            // 0 = ausgelöstes; 1 = zyklisches; 2 = Wochenplan;
            $eid = IPS_CreateEvent(0);
            // Set Parent
-           IPS_SetParent($eid, $this->InstanceID);
+           IPS_SetParent($eid, $insID);
            // Set Name
-           IPS_SetName($eid, "Trigger onChange");
+           IPS_SetName($eid, "TriggerOnChange");
            // Set Script 
            IPS_SetEventScript($eid, "DMXDYN_refresh(". $hauptInstanz .", ". $insID .", ". $triggerID .");");
            // OnUpdate für Variable 12345
