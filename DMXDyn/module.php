@@ -168,7 +168,7 @@
        }
 
         // Own Function
-        public function refresh($hauptInstanz, $insID, $triggerID) {
+        public function refresh($InstanceID, $insID, $triggerID) {
            // Anhand der TriggerID muss ich erkennen welcher der Parent ist und kann dann die Werte neu setzen
 
            $FadeSpeed = 1.5;
@@ -206,10 +206,10 @@
         
 
            // Get Global ID`s
-           $getGlobalR = IPS_GetVariableIDByName("GlobalR", $hauptInstanz);
-           $getGlobalG = IPS_GetVariableIDByName("GlobalG", $hauptInstanz);
-           $getGlobalB = IPS_GetVariableIDByName("GlobalB", $hauptInstanz);
-           $getGlobalW = IPS_GetVariableIDByName("GlobalW", $hauptInstanz);
+           $getGlobalR = IPS_GetVariableIDByName("GlobalR", $InstanceID);
+           $getGlobalG = IPS_GetVariableIDByName("GlobalG", $InstanceID);
+           $getGlobalB = IPS_GetVariableIDByName("GlobalB", $InstanceID);
+           $getGlobalW = IPS_GetVariableIDByName("GlobalW", $InstanceID);
 
            // Get Global Values
            $getValueGlobalR = GetValue($getGlobalR);
