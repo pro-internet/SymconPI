@@ -62,6 +62,11 @@
             "GChannel": "InstanceID",
             "BChannel": "InstanceID",
             "WChannel": "InstanceID"
+        }],
+        "actions": [{
+            "type": "Button",
+            "label": "Update",
+            "onClick": "DMXDYN_DeleteObject();"
         }]
     }]
 }

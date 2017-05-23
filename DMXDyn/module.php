@@ -26,7 +26,7 @@
                 $this->CreateProfile("DMX.Channel", 1, 0, 100000, 1, 1, "", "");
             }
             if(!IPS_VariableProfileExists("DMX.Fade")){
-                $this->CreateProfile("DMX.Fade", 1, 0, 10, 1, 1, "", "s");
+                $this->CreateProfile("DMX.Fade", 2, 0, 10, 0.5, 1, "", "");
             }
             if(!IPS_VariableProfileExists("~Switch")){
                 $this->CreateProfile("~Switch", 0, 0, 1, 1, 1, "", "");
@@ -34,11 +34,11 @@
 
             // Create Instance Vars (RGBW & FadeWert)
             // CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action)
-            $vid = $this->CreateVariable(1,"GlobalR","VarID_RWert", $parent, 0, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1,"GlobalG","VarID_GWert", $parent, 1, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1,"GlobalB","VarID_BWert", $parent, 2, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1,"GlobalW","VarID_WWert", $parent, 3, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1, "GlobalFade","VarID_FadeWert", $parent, 4, 0, "DMX.Fade", "16562", false);
+            $vid = $this->CreateVariable(1,"Global Rot","VarID_RWert", $parent, 0, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1,"Global Gelb","VarID_GWert", $parent, 1, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1,"Global Blau","VarID_BWert", $parent, 2, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1,"Global Weiss","VarID_WWert", $parent, 3, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(2, "Global Fade","VarID_FadeWert", $parent, 4, 0, "DMX.Fade", "16562", false);
 
             
         }
@@ -80,7 +80,7 @@
                     IPS_SetIdent($insID, "device$i");
 
                     $array = json_decode(json_encode($list),true);
-                    print_r($array['RChannel']);
+                    //print_r($array['RChannel']);
 
                     $R = $array['RChannel'];
                     $G = $array['GChannel'];
@@ -89,12 +89,12 @@
 
                     $isEmpty = @IPS_GetObjectIDByIdent("R", $insID);
                     if(!empty($isEmpty)){
-                        $RV = IPS_GetVariableIDByName(  "R",      $insID);
-                        $GV = IPS_GetVariableIDByName(  "G",      $insID);
-                        $BV = IPS_GetVariableIDByName(  "B",      $insID);
-                        $WV = IPS_GetVariableIDByName(  "W",      $insID);
-                        $FV = IPS_GetVariableIDByName(  "Fade",   $insID);
-                        $SV = IPS_GetVariableIDByName(  "Switch", $insID);
+                        $RV = IPS_GetVariableIDByName("R",      $insID);
+                        $GV = IPS_GetVariableIDByName("G",      $insID);
+                        $BV = IPS_GetVariableIDByName("B",      $insID);
+                        $WV = IPS_GetVariableIDByName("W",      $insID);
+                        $FV = IPS_GetVariableIDByName("Fade",   $insID);
+                        $SV = IPS_GetVariableIDByName("Switch", $insID);
                         $EV = IPS_GetEventIDByName("TriggerOnChange",  $insID);
                         IPS_DeleteVariable($RV);
                         IPS_DeleteVariable($GV);
@@ -110,7 +110,7 @@
                     $vid = $this->CreateVariable(1,"G", "G", $insID, 2, $G, "DMX.Channel", "16562", TRUE);
                     $vid = $this->CreateVariable(1,"B", "B", $insID, 3, $B, "DMX.Channel", "16562", TRUE);
                     $vid = $this->CreateVariable(1,"W", "W", $insID, 4, $W, "DMX.Channel", "16562", TRUE);
-                    $vid = $this->CreateVariable(1,"Fade", "Fade", $insID, 5, 5, "DMX.Fade", "16562", TRUE);
+                    $vid = $this->CreateVariable(2,"Fade", "Fade", $insID, 5, 5, "DMX.Fade", "16562", TRUE);
 
                     // Generate Switch
                     $vid = $this->CreateVariable(0, "Switch", "Swtich", $insID, 0, 0, "~Switch", "16562", FALSE);
@@ -118,10 +118,68 @@
                     // Get Switch ID
                     $triggerID = IPS_GetVariableIDByName("Switch", $insID);
                     $vid = $this->CreateEventOn($insID, $triggerID, $hauptInstanz);
+
+                    //lösche überschüssige räume
+                    while($i < count(IPS_GetChildrenIDs(IPS_GetParent($this->InstanceID)))){
+                        $i++;
+                        if(@IPS_GetObjectIDByIdent("device$i", IPS_GetParent($this->InstanceID)) !== false)
+                        {
+                            $id = IPS_GetObjectIDByIdent("device$i", IPS_GetParent($this->InstanceID));
+                            $this->DeleteObject($id);
+                        }
+                    }
                 }
             }
 
+
+
         }
+
+        public function Destroy() {
+            parent::Destroy();
+
+            echo "LOOOOL loeschen Button gedrueckt";
+        }
+
+        protected function DeleteObject($id){
+		if(IPS_HasChildren($id))
+		{
+			$childrenIDs = IPS_GetChildrenIDs($id);
+			foreach($childrenIDs as $chid)
+			{
+				$this->DeleteObject($chid);
+			}
+			$this->DeleteObject($id);
+		}
+		else
+		{
+			$type = IPS_GetObject($id)['ObjectType'];
+			switch($type)
+			{
+				case(0 /*kategorie*/):
+					IPS_DeleteCategory($id);
+					break;
+				case(1 /*Instanz*/):
+					IPS_DeleteInstance($id);
+					break;
+				case(2 /*Variable*/):
+					IPS_DeleteVariable($id);
+					break;
+				case(3 /*Skript*/):
+					IPS_DeleteScript($id,false /*move file to "Deleted" folder*/);
+					break;
+				case(4 /*Ereignis*/):
+					IPS_DeleteEvent($id);
+					break;
+				case(5 /*Media*/):
+					IPS_DeleteMedia($id);
+					break;
+				case(6 /*Link*/):
+					IPS_DeleteLink($id);
+					break;
+			}
+		}
+	}
 
         
        protected function CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action, $hide){
@@ -206,34 +264,36 @@
         
 
            // Get Global ID`s
-           $getGlobalR = IPS_GetVariableIDByName("GlobalR", $InstanceID);
-           $getGlobalG = IPS_GetVariableIDByName("GlobalG", $InstanceID);
-           $getGlobalB = IPS_GetVariableIDByName("GlobalB", $InstanceID);
-           $getGlobalW = IPS_GetVariableIDByName("GlobalW", $InstanceID);
+           $getGlobalR = IPS_GetVariableIDByName("Global Rot", $InstanceID);
+           $getGlobalG = IPS_GetVariableIDByName("Global Gelb", $InstanceID);
+           $getGlobalB = IPS_GetVariableIDByName("Global Blau", $InstanceID);
+           $getGlobalW = IPS_GetVariableIDByName("Global Weiss", $InstanceID);
+           $getGlobalF = IPS_GetVariableIDByName("Global Fade", $InstanceID);
 
            // Get Global Values
            $getValueGlobalR = GetValue($getGlobalR);
            $getValueGlobalG = GetValue($getGlobalG);
            $getValueGlobalB = GetValue($getGlobalB);
            $getValueGlobalW = GetValue($getGlobalW);
+           $getValueGlobalF = GetValue($getGlobalF);
 
            // IF True Set Values
            $Switch = GetValue($triggerID);
 
            if($Switch == TRUE){
                 // Set Channel Values
-                DMX_FadeChannel($getDevice, $channelNumberR, $getValueGlobalR, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $channelNumberG, $getValueGlobalG, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $channelNumberB, $getValueGlobalB, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $channelNumberW, $getValueGlobalW, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $channelNumberR, $getValueGlobalR, $getValueGlobalF);
+                DMX_FadeChannel($getDevice, $channelNumberG, $getValueGlobalG, $getValueGlobalF);
+                DMX_FadeChannel($getDevice, $channelNumberB, $getValueGlobalB, $getValueGlobalF);
+                DMX_FadeChannel($getDevice, $channelNumberW, $getValueGlobalW, $getValueGlobalF);
            }
            // IF False Set 0
             if($Switch == FALSE){
                 // Set Channel Values
-                DMX_FadeChannel($getDevice, $channelNumberR, 0, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $channelNumberG, 0, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $channelNumberB, 0, $FadeSpeed);
-                DMX_FadeChannel($getDevice, $channelNumberW, 0, $FadeSpeed);
+                DMX_FadeChannel($getDevice, $channelNumberR, 0, $getValueGlobalF);
+                DMX_FadeChannel($getDevice, $channelNumberG, 0, $getValueGlobalF);
+                DMX_FadeChannel($getDevice, $channelNumberB, 0, $getValueGlobalF);
+                DMX_FadeChannel($getDevice, $channelNumberW, 0, $getValueGlobalF);
             }
         }
 
