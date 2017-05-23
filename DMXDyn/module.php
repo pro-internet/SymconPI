@@ -140,11 +140,18 @@
                     //lösche überschüssige räume
                     while($i < count(IPS_GetChildrenIDs(IPS_GetParent($this->InstanceID)))){
                         $i++;
+                        if($i == 0){
+                            $i--;
+                            $id = IPS_GetObjectIDByIdent("device$i", IPS_GetParent($this->InstanceID));
+                            $this->DeleteObject($id);
+                        }
+                        
                         if(@IPS_GetObjectIDByIdent("device$i", IPS_GetParent($this->InstanceID)) !== false)
                         {
                             $id = IPS_GetObjectIDByIdent("device$i", IPS_GetParent($this->InstanceID));
                             $this->DeleteObject($id);
                         }
+                        
                     }
                 }
             }
