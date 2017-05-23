@@ -34,11 +34,11 @@
 
             // Create Instance Vars (RGBW & FadeWert)
             // CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action)
-            $vid = $this->CreateVariable(1,"Global R","VarID_RWert", $parent, 0, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1,"Global G","VarID_GWert", $parent, 1, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1,"Global B","VarID_BWert", $parent, 2, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1,"Global W","VarID_WWert", $parent, 3, 0, "DMX.Dim", "16562", false);
-            $vid = $this->CreateVariable(1, "Global Fade","VarID_FadeWert", $parent, 4, 0, "DMX.Fade", "16562", false);
+            $vid = $this->CreateVariable(1,"GlobalR","VarID_RWert", $parent, 0, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1,"GlobalG","VarID_GWert", $parent, 1, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1,"GlobalB","VarID_BWert", $parent, 2, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1,"GlobalW","VarID_WWert", $parent, 3, 0, "DMX.Dim", "16562", false);
+            $vid = $this->CreateVariable(1, "GlobalFade","VarID_FadeWert", $parent, 4, 0, "DMX.Fade", "16562", false);
 
             
         }
@@ -49,6 +49,7 @@
             parent::ApplyChanges();
 
             $parent = $this->InstanceID;
+            $hauptInstanz = $parent;
 
 
             $moduleList = IPS_GetModuleList();
@@ -98,7 +99,7 @@
                     
                     // Get Switch ID
                     $triggerID = IPS_GetVariableIDByName("Switch", $insID);
-                    $vid = $this->CreateEventOn($insID, $triggerID);
+                    $vid = $this->CreateEventOn($insID, $triggerID, $hauptInstanz);
                 }
             }
 
@@ -133,7 +134,7 @@
             IPS_SetVariableProfileIcon($profile, $icon);
        }
 
-       protected function CreateEventOn($insID, $triggerID){
+       protected function CreateEventOn($insID, $triggerID, $hauptInstanz){
            // 0 = ausgelöstes; 1 = zyklisches; 2 = Wochenplan;
            $eid = IPS_CreateEvent(0);
            // Set Parent
@@ -141,7 +142,7 @@
            // Set Name
            IPS_SetName($eid, "Trigger onChange");
            // Set Script 
-           IPS_SetEventScript($eid, "DMXDYN_refresh(". $triggerID .");");
+           IPS_SetEventScript($eid, "DMXDYN_refresh(". $hauptInstanz .", ". $insID .", ". $triggerID .");");
            // OnUpdate für Variable 12345
            IPS_SetEventTrigger($eid, 0, $triggerID);            
            IPS_SetEventActive($eid, true);
@@ -149,12 +150,51 @@
        }
 
         // Own Function
-        public function refresh($triggerID) {
+        public function refresh($hauptInstanz, $insID, $triggerID) {
            // Anhand der TriggerID muss ich erkennen welcher der Parent ist und kann dann die Werte neu setzen
 
-           echo "Yuhuuuuu";
+           // Get Channel ID`s
+           $getChannelR = IPS_GetVariableIDByName("R", $insID);
+           $getChannelG = IPS_GetVariableIDByName("G", $insID);
+           $getChannelB = IPS_GetVariableIDByName("B", $insID);
+           $getChannelW = IPS_GetVariableIDByName("W", $insID);
 
+           // Get Channel Values
+           $getValueChannelR = GetValue($getChannelR);
+           $getValueChannelG = GetValue($getChannelG);
+           $getValueChannelB = GetValue($getChannelB);
+           $getValueChannelW = GetValue($getChannelW);
 
+           // Get Global ID`s
+           $getGlobalR = IPS_GetVariableIDByName("GlobalR", $hauptInstanz);
+           $getGlobalG = IPS_GetVariableIDByName("GlobalG", $hauptInstanz);
+           $getGlobalB = IPS_GetVariableIDByName("GlobalB", $hauptInstanz);
+           $getGlobalW = IPS_GetVariableIDByName("GlobalW", $hauptInstanz);
+
+           // Get Global Values
+           $getValueGlobalR = GetValue($getGlobalR);
+           $getValueGlobalG = GetValue($getGlobalG);
+           $getValueGlobalB = GetValue($getGlobalB);
+           $getValueGlobalW = GetValue($getGlobalW);
+
+           // IF True Set Values
+           $Switch = GetValue($triggerID);
+           echo $Switch;
+           if($Switch == TRUE){
+                // Set Channel Values
+                SetValue($getValueChannelR, $getValueGlobalR);
+                SetValue($getValueChannelG, $getValueGlobalG);
+                SetValue($getValueChannelB, $getValueGlobalB);
+                SetValue($getValueChannelW, $getValueGlobalW);
+           }
+           // IF False Set 0
+            if($Switch == FALSE){
+                // Set Channel Values
+                SetValue($getValueChannelR, 0);
+                SetValue($getValueChannelG, 0);
+                SetValue($getValueChannelB, 0);
+                SetValue($getValueChannelW, 0);
+            }
         }
     }
 ?>
