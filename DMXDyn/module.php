@@ -50,13 +50,14 @@
             $svs = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 
             // Create Instance Vars (RGBW & FadeWert)
-            // CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action)
+            // CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action, $hide)
             $vid = $this->CreateVariable(1,"Global R","VarID_RWert", $parent, 0, 0, "DMX.Dim", $svs, false);
             $vid = $this->CreateVariable(1,"Global G","VarID_GWert", $parent, 1, 0, "DMX.Dim", $svs, false);
             $vid = $this->CreateVariable(1,"Global B","VarID_BWert", $parent, 2, 0, "DMX.Dim", $svs, false);
             $vid = $this->CreateVariable(1,"Global W","VarID_WWert", $parent, 3, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(2, "Global Fade","VarID_FadeWert", $parent, 4, 0, "DMX.Fade", $svs, false);
+            $vid = $this->CreateVariable(2, "Global Fade","VarID_FadeWert", $parent, 4, 1, "DMX.Fade", $svs, false);
 
+            // Set Trigger Events on Vars
             
         }
  
