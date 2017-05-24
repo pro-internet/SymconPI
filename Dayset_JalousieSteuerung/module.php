@@ -203,7 +203,6 @@ if (\$IPS_SENDER == \"WebFront\")
 		//Define "Räume" Module as this->InstanceID
 		IPS_SetIdent($this->InstanceID, "RaeumeIns");
 		IPS_SetPosition($this->InstanceID, 3);
-		IPS_SetIcon($this->InstanceID, "Jalousie");
 		
 		//Create Selector Profile
 		$this->CreateSelectProfile();
@@ -223,6 +222,8 @@ if (\$IPS_SENDER == \"WebFront\")
 		
 		if($this->InstanceParentID != 0)
 		{
+			IPS_SetIcon($this->InstanceID, "Jalousie");
+			
 			//Create the Dummy Modules
 			$dummyGUID = $this->GetModuleIDByName("Dummy Module");
 			$this->CreateInstance($this->dummyGUID, "Werte", "WerteIns", $this->InstanceParentID, 0);
@@ -324,6 +325,26 @@ if (\$IPS_SENDER == \"WebFront\")
 				$this->CreateCategory("Switch", "Switch", $catID, 2);
 				$vid = $this->CreateVariable(1, $content->Raumname, "raum$id", $insID, $id, 0, "DSJal.Selector", "SetValue");
 				$this->CreateEvent($content->Raumname . "OnChange", "raum$id" . "onchange", $EventCatID, 0, 0, $vid, "DSJal_SetValue(" . $this->InstanceID . "," . "\"raum$id\");");
+			}
+			$insID = IPS_GetObjectIDByIdent("AutomatikIns", $this->InstanceParentID);
+			if(count($data) < count(IPS_GetChildrenIDs($insID)))
+			{
+				$children = IPS_GetChildrenIDs($insID);
+				$insID = IPS_GetObjectIDByIdent("TageszeitenIns", $this->InstanceParentID);
+				for($i = count($data); $i < count($children); $i++)
+				{
+					$ident = IPS_GetObject($children[$i])['ObjectIdent'];
+					IPS_DeleteVariable($children[$i]);
+					$child = IPS_GetObjectIDByIdent($ident, $this->InstanceID);
+					IPS_DeleteVariable($child);
+					$cids = IPS_GetChildrenIDs($insID);
+					foreach($cids as $childID)
+					{
+						$TageszeitenIdent = IPS_GetObject($childID)['ObjectIdent'];
+						if(strpos($TageszeitenIdent, $ident) !== false)
+							IPS_DeleteVariable($childID);
+					}
+				}
 			}
 		}
 	}
