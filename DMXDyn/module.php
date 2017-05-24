@@ -114,7 +114,6 @@
                         $GV = IPS_GetVariableIDByName("G",      $insID);
                         $BV = IPS_GetVariableIDByName("B",      $insID);
                         $WV = IPS_GetVariableIDByName("W",      $insID);
-                        $FV = IPS_GetVariableIDByName("Fade",   $insID);
                         $SV = IPS_GetVariableIDByName($S, $insID);
                         $EV = IPS_GetEventIDByName("TriggerOnChange",  $insID);
                         IPS_DeleteVariable($RV);
@@ -131,8 +130,7 @@
                     $vid = $this->CreateVariable(1,"G", "G", $insID, 2, $G, "DMX.Channel", $svs, TRUE);
                     $vid = $this->CreateVariable(1,"B", "B", $insID, 3, $B, "DMX.Channel", $svs, TRUE);
                     $vid = $this->CreateVariable(1,"W", "W", $insID, 4, $W, "DMX.Channel", $svs, TRUE);
-                    $vid = $this->CreateVariable(2,"Fade", "Fade", $insID, 5, 5, "DMX.Fade", $svs, TRUE);
-
+                    
                     // Generate Switch
                     $vid = $this->CreateVariable(0, $S, $S, $insID, 0, 0, "~Switch", $svs, FALSE);
                     
