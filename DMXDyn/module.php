@@ -51,10 +51,10 @@
 
             // Create Instance Vars (RGBW & FadeWert)
             // CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action)
-            $vid = $this->CreateVariable(1,"Global Rot","VarID_RWert", $parent, 0, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(1,"Global Gruen","VarID_GWert", $parent, 1, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(1,"Global Blau","VarID_BWert", $parent, 2, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(1,"Global Weiss","VarID_WWert", $parent, 3, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global R","VarID_RWert", $parent, 0, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global G","VarID_GWert", $parent, 1, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global B","VarID_BWert", $parent, 2, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global W","VarID_WWert", $parent, 3, 0, "DMX.Dim", $svs, false);
             $vid = $this->CreateVariable(2, "Global Fade","VarID_FadeWert", $parent, 4, 0, "DMX.Fade", $svs, false);
 
             
@@ -93,17 +93,19 @@
                         $insID = IPS_GetObjectIDByIdent("device$i", IPS_GetParent($this->InstanceID));
                     }
 
-                    IPS_SetName($insID, $list->Name);
+                    //IPS_SetName($insID, $list->Name);
+                    IPS_SetName(" ");
                     IPS_SetPosition($insID, $i + 1);
                     IPS_SetIdent($insID, "device$i");
 
                     $array = json_decode(json_encode($list),true);
-                    //print_r($array['RChannel']);
+                    //print_r($array);
 
                     $R = $array['RChannel'];
                     $G = $array['GChannel'];
                     $B = $array['BChannel'];
                     $W = $array['WChannel'];
+                    $S = $array['Name'];
 
                     $isEmpty = @IPS_GetObjectIDByIdent("R", $insID);
                     if(!empty($isEmpty)){
@@ -112,7 +114,7 @@
                         $BV = IPS_GetVariableIDByName("B",      $insID);
                         $WV = IPS_GetVariableIDByName("W",      $insID);
                         $FV = IPS_GetVariableIDByName("Fade",   $insID);
-                        $SV = IPS_GetVariableIDByName("Switch", $insID);
+                        $SV = IPS_GetVariableIDByName($S, $insID);
                         $EV = IPS_GetEventIDByName("TriggerOnChange",  $insID);
                         IPS_DeleteVariable($RV);
                         IPS_DeleteVariable($GV);
@@ -131,10 +133,10 @@
                     $vid = $this->CreateVariable(2,"Fade", "Fade", $insID, 5, 5, "DMX.Fade", $svs, TRUE);
 
                     // Generate Switch
-                    $vid = $this->CreateVariable(0, "Switch", "Swtich", $insID, 0, 0, "~Switch", $svs, FALSE);
+                    $vid = $this->CreateVariable(0, $S, $S, $insID, 0, 0, "~Switch", $svs, FALSE);
                     
                     // Get Switch ID
-                    $triggerID = IPS_GetVariableIDByName("Switch", $insID);
+                    $triggerID = IPS_GetVariableIDByName($S, $insID);
                     $vid = $this->CreateEventOn($insID, $triggerID, $hauptInstanz);
 
                     //lösche überschüssige räume
@@ -289,10 +291,10 @@
         
 
            // Get Global ID`s
-           $getGlobalR = IPS_GetVariableIDByName("Global Rot", $InstanceID);
-           $getGlobalG = IPS_GetVariableIDByName("Global Gruen", $InstanceID);
-           $getGlobalB = IPS_GetVariableIDByName("Global Blau", $InstanceID);
-           $getGlobalW = IPS_GetVariableIDByName("Global Weiss", $InstanceID);
+           $getGlobalR = IPS_GetVariableIDByName("Global R", $InstanceID);
+           $getGlobalG = IPS_GetVariableIDByName("Global G", $InstanceID);
+           $getGlobalB = IPS_GetVariableIDByName("Global B", $InstanceID);
+           $getGlobalW = IPS_GetVariableIDByName("Global W", $InstanceID);
            $getGlobalF = IPS_GetVariableIDByName("Global Fade", $InstanceID);
 
            // Get Global Values
