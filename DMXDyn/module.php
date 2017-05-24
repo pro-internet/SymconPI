@@ -19,6 +19,7 @@
             $parent = $this->InstanceID;
 
             // Create Instance Profies
+            // CreateProfile($profile, $type, $min, $max, $steps, $digits = 0, $prefix = "DMX", $suffix = "", $icon = "")
             if(!IPS_VariableProfileExists("DMX.Dim")){
 			    $this->CreateProfile("DMX.Dim", 1, 0, 255, 1, 1, "", "%");
 		    }
@@ -50,13 +51,12 @@
             $svs = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 
             // Create Instance Vars (RGBW & FadeWert)
-            // CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action)
-            $vid = $this->CreateVariable(1,"Global R","VarID_RWert", $parent, 0, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(1,"Global G","VarID_GWert", $parent, 1, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(1,"Global B","VarID_BWert", $parent, 2, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(1,"Global W","VarID_WWert", $parent, 3, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(2, "Global Fade","VarID_FadeWert", $parent, 4, 0, "DMX.Fade", $svs, false);
-
+            // CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action, $hide)
+            $vid = $this->CreateVariable(1,"Global R","VarID_RWert", $parent, 1, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global G","VarID_GWert", $parent, 2, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global B","VarID_BWert", $parent, 3, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global W","VarID_WWert", $parent, 4, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(2, "Global Fade","VarID_FadeWert", $parent, 5, 1, "DMX.Fade", $svs, false);
             
         }
  
@@ -93,8 +93,8 @@
                         $insID = IPS_GetObjectIDByIdent("device$i", IPS_GetParent($this->InstanceID));
                     }
 
-                    //IPS_SetName($insID, $list->Name);
-                    IPS_SetName(" ");
+                    IPS_SetName($insID, $list->Name);
+                    //IPS_SetName(" ");
                     IPS_SetPosition($insID, $i + 1);
                     IPS_SetIdent($insID, "device$i");
 
@@ -113,7 +113,6 @@
                         $GV = IPS_GetVariableIDByName("G",      $insID);
                         $BV = IPS_GetVariableIDByName("B",      $insID);
                         $WV = IPS_GetVariableIDByName("W",      $insID);
-                        $FV = IPS_GetVariableIDByName("Fade",   $insID);
                         $SV = IPS_GetVariableIDByName($S, $insID);
                         $EV = IPS_GetEventIDByName("TriggerOnChange",  $insID);
                         IPS_DeleteVariable($RV);
@@ -130,8 +129,7 @@
                     $vid = $this->CreateVariable(1,"G", "G", $insID, 2, $G, "DMX.Channel", $svs, TRUE);
                     $vid = $this->CreateVariable(1,"B", "B", $insID, 3, $B, "DMX.Channel", $svs, TRUE);
                     $vid = $this->CreateVariable(1,"W", "W", $insID, 4, $W, "DMX.Channel", $svs, TRUE);
-                    $vid = $this->CreateVariable(2,"Fade", "Fade", $insID, 5, 5, "DMX.Fade", $svs, TRUE);
-
+                    
                     // Generate Switch
                     $vid = $this->CreateVariable(0, $S, $S, $insID, 0, 0, "~Switch", $svs, FALSE);
                     
@@ -157,9 +155,6 @@
                     }
                 }
             }
-
-
-
         }
 
         public function Destroy() {
