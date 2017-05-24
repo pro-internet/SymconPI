@@ -247,6 +247,10 @@ if (\$IPS_SENDER == \"WebFront\")
 			//Create Link to Dayset
 			$target = $this->ReadPropertyInteger("DaysetVar");
 			$this->CreateLink($target, "DaysetLink", $insID, -9999);
+			
+			//Create Dayset Event
+			$this->CreateEvent("Daysetonchange", "DaysetEvent", $EventCatID, 0, 1, $target, "DSJal_refresh(" . $this->InstanceID . "," . $target . ");");
+			
 				//Früh
 				$id = $this->CreateInstance($this->dummyGUID, "Früh", "FruehIns", $insID, -1);
 				//IPS_SetIcon($id, "Fog");
@@ -280,6 +284,13 @@ if (\$IPS_SENDER == \"WebFront\")
 				{
 					$this->CreateVariable(1, $content->Raumname, "Abendraum$id", $insID, $id + 1 + count($data) * 4 + 3, 0, "DSJal.Selector", "SetValue");
 				}
+				//Nacht
+				$id = $this->CreateInstance($this->dummyGUID, "Nacht", "NachtIns", $insID, count($data) * 5 + 4);
+				//IPS_SetIcon($id, "Moon");
+				foreach($data as $id => $content)
+				{
+					$this->CreateVariable(1, $content->Raumname, "Nachtraum$id", $insID, $id + 1 + count($data) * 5 + 4, 0, "DSJal.Selector", "SetValue");
+				}
 			
 			//Create Objects for "Räume"
 			$insID = $this->InstanceID;
@@ -295,13 +306,191 @@ if (\$IPS_SENDER == \"WebFront\")
 		}
 	}
 	
+	private function SetValueByDevice($insID, $value)
+	{
+		if(gettype($value) == "boolean")
+		{
+			EIB_Switch($insID, $value);
+		}
+		else
+		{
+			EIB_DriveShutterValue($insID, $value);
+		}
+	}
+	
+	private function Set($targetFolder, $value)
+	{
+		$targets = IPS_GetChildrenIDs($targetFolder);
+		foreach($targets as $target) 
+		{
+			if(IPS_LinkExists($target)) //only allow links
+			{
+				$target = IPS_GetLink($target)['TargetID'];
+				if(IPS_InstanceExists($target))
+				{
+					$insID = $target;
+					$target = @IPS_GetChildrenIDs($target)[0];
+				}
+				if (IPS_VariableExists($target))
+				{
+					$o = IPS_GetObject($target);
+					$v = IPS_GetVariable($target);
+					$currentValue = GetValue($target);
+					if(gettype($value) == "boolean" || $currentValue != $value)
+					{	
+						$switchValue = true;
+					}
+					else
+					{
+						$switchValue = false;
+					}
+					
+					if($switchValue)
+					{
+						if($v['VariableCustomAction'] > 0)
+							$actionID = $v['VariableCustomAction'];
+						else
+							$actionID = $v['VariableAction'];
+						
+						//try changing the value by device-specific commands
+						if($actionID < 10000)
+						{
+							if(@$insID != NULL)
+								$this->SetValueByDevice($insID, $value);
+							SetValue($target, $value);
+							//Skip this device if we do not have a proper id
+							continue;
+						}
+							
+						if(IPS_InstanceExists($actionID)) {
+							IPS_RequestAction($actionID, $o['ObjectIdent'], $value);
+						} else if(IPS_ScriptExists($actionID)) {
+							echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value, "SENDER" => "WebFront"));
+						}	
+					}
+				}
+				else
+				{
+					SetValueByDevice($insID, $value);
+				}
+			}
+			else
+			{
+				throw new Exception('Only Links as Targets allowed');
+			}
+		}
+	}
+	
 	////////////////////
 	//public functions//
 	////////////////////
 	
 	public function SetValue($ident)
 	{
+		$this->InstanceParentID = IPS_GetParent($this->InstanceID);
+		$roomVar = IPS_GetObjectIDByIdent($ident, $this->InstanceID);
+		$WerteIns = IPS_GetObjectIDByIdent("WerteIns", $this->InstanceParentID);
 		
+		//Get the Targets
+		$targetsCatID = IPS_GetObjectIDByIdent("Targets$ident", $this->InstanceID);
+		$targetsJal = IPS_GetObjectIDByIdent("Jalousie", $targetsCatID);
+		$targetsLam = IPS_GetObjectIDByIdent("Lamellen", $targetsCatID);
+		$targetsSwi = IPS_GetObjectIDByIdent("Switch", $targetsCatID);
+		
+		switch(GetValue($roomVar))
+		{
+			case(0 /*Offen*/):
+				//Get the Values
+				$vid = IPS_GetObjectIDByIdent("OffenVar", $WerteIns);
+				$value = GetValue($vid);
+				$this->Set($targetsSwi, $value);
+				break;
+			case(1 /*Geschlossen*/):
+				//Get the Values
+				$vid = IPS_GetObjectIDByIdent("GeschlossenVar", $WerteIns);
+				$value = GetValue($vid);
+				$this->Set($targetsSwi, $value);
+				break;
+			case(2 /*Ausblick*/):
+				//Get the Values
+				//Behang
+				$vid = IPS_GetObjectIDByIdent("AusblickBehangVar", $WerteIns);
+				$value = GetValue($vid);
+				$this->Set($targetsJal, $value);
+				//Lamellen
+				$vid = IPS_GetObjectIDByIdent("AusblickLamellenVar", $WerteIns);
+				$value = GetValue($vid);
+				$this->Set($targetsLam, $value);
+				break;
+			case(3 /*Beschattung*/):
+				//Get the Values
+				//Behang
+				$vid = IPS_GetObjectIDByIdent("BeschattungBehangVar", $WerteIns);
+				$value = GetValue($vid);
+				$this->Set($targetsJal, $value);
+				//Lamellen
+				$vid = IPS_GetObjectIDByIdent("BeschattungLamellenVar", $WerteIns);
+				$value = GetValue($vid);
+				$this->Set($targetsLam, $value);
+				break;
+			case(4 /*Sonnenschutz*/):
+				//Get the Values
+				//Behang
+				$vid = IPS_GetObjectIDByIdent("SonnenschutzBehangVar", $WerteIns);
+				$value = GetValue($vid);
+				$this->Set($targetsJal, $value);
+				//Lamellen
+				$vid = IPS_GetObjectIDByIdent("SonnenschutzLamellenVar", $WerteIns);
+				$value = GetValue($vid);
+				$this->Set($targetsLam, $value);
+				break;
+			default:
+				echo "index not found: " . GetValue($roomVar);
+		}
+	}
+	
+	public function refresh($sender)
+	{
+		//Get Content of Table
+		$dataJSON = $this->ReadPropertyString("Raeume");
+		$data = json_decode($dataJSON);
+		
+		$this->InstanceParentID = IPS_GetParent($this->InstanceID);
+		$automatikIns = IPS_GetObjectIDByIdent("AutomatikIns", $this->InstanceParentID);
+		$tageszeitenIns = IPS_GetObjectIDByIdent("Tageszeiten", $this->InstanceParentID);
+		$daysetVar = $this->ReadPropertyInteger("DaysetVar");
+		foreach($data as $id => $content)
+		{
+			switch(GetValue($daysetVar))
+			{
+				case(1 /*Früh*/):
+					$vid = IPS_GetObjectIDByIdent("Fruehraum$id");
+					break;
+				case(2 /*Sonnenaufgang*/):
+					$vid = IPS_GetObjectIDByIdent("Sonnenaufgangraum$id");
+					break;
+				case(3 /*Tag*/):
+					$vid = IPS_GetObjectIDByIdent("Tagraum$id");
+					break;
+				case(4 /*Dämmerung*/):
+					$vid = IPS_GetObjectIDByIdent("Daemmerungraum$id");
+					break;
+				case(5 /*Abend*/):
+					$vid = IPS_GetObjectIDByIdent("Abendraum$id");
+					break;
+				case(6 /*Nacht*/):
+					$vid = IPS_GetObjectIDByIdent("Nachtraum$id");
+					break;
+			}
+			$roomID = IPS_GetObjectIDByIdent("raum$id", $this->InstanceID);
+			$automatikRaumID = IPS_GetObjectIDByIdent("raum$id", $automatikIns);
+			$automatik = GetValue($automatikRaumID);
+			if($automatik)
+			{
+				$value = GetValue($vid);
+				SetValue($raumID, $value);
+			}
+		}
 	}
 }
 ?>
