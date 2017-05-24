@@ -83,6 +83,7 @@
 
             // On Apply read Device List
             $deviceList = json_decode($this->ReadPropertyString("Lichter"));
+            print_r($deviceList);
             
             if (is_array($deviceList) || is_object($deviceList)){
                 foreach($deviceList as $i => $list){
@@ -121,7 +122,6 @@
                         IPS_DeleteVariable($GV);
                         IPS_DeleteVariable($BV);
                         IPS_DeleteVariable($WV);
-                        IPS_DeleteVariable($FV);
                         IPS_DeleteVariable($SV);
                         IPS_DeleteEvent($EV);
                     }
@@ -165,17 +165,18 @@
                 $triggerB = IPS_GetVariableIDByName("Global B", $parent);
                 $triggerW = IPS_GetVariableIDByName("Global W", $parent);
 
-                $vid = $this->CreateEventTrigger($deviceList, $triggerR);
-                $vid = $this->CreateEventTrigger($deviceList, $triggerG);
-                $vid = $this->CreateEventTrigger($deviceList, $triggerB);
-                $vid = $this->CreateEventTrigger($deviceList, $triggerW);
+                $vid = $this->CreateEventTrigger($triggerR);
+                $vid = $this->CreateEventTrigger($triggerG);
+                $vid = $this->CreateEventTrigger($triggerB);
+                $vid = $this->CreateEventTrigger($triggerW);
             }
         }
 
 
-        public function eventTriggerOnChange($deviceList){
-            /*
-            $parent = $this->InstanceID;
+        public function eventTriggerOnChange($InstanceID){
+            
+            $parent = $InstanceID;
+            $deviceList = json_decode($this->ReadPropertyString("Lichter"));
 
             // Get Global ID`s
             $getGlobalR = IPS_GetVariableIDByName("Global R", $parent);
@@ -191,14 +192,42 @@
             $getValueGlobalW = GetValue($getGlobalW);
             $getValueGlobalF = GetValue($getGlobalF);
 
-            if (is_array($deviceList) || is_object($deviceList)){
-                foreach($deviceList as $i => $list){
 
+            if (is_array($deviceList) || is_object($deviceList)){
+                foreach($deviceList as $i => $device){
                     // Set Value for each Device and if the Switch set on
-                    $id = IPS_GetObjectIDByIdent("device$i", IPS_GetParent($this->InstanceID));
-                    print_r($id);
+                    print_r($device->RChannel);
+                    echo "\n";
+
+                    $getValueChannelR = GetValue($device->RChannel);
+                    $getValueChannelG = GetValue($device->GChannel);
+                    $getValueChannelB = GetValue($device->BChannel);
+                    $getValueChannelW = GetValue($device->WChannel);
+                    $getDevice        = IPS_GetParent($getValueChannelR);
+
+                    // Get Ident 
+                    $channelObjectR = IPS_GetObject($getValueChannelR);
+                    $channelObjectG = IPS_GetObject($getValueChannelG);
+                    $channelObjectB = IPS_GetObject($getValueChannelB);
+                    $channelObjectW = IPS_GetObject($getValueChannelW);
+
+                    // Get Channel Number
+                    $channelStringR = $channelObjectR['ObjectIdent'];
+                    $channelStringG = $channelObjectG['ObjectIdent'];
+                    $channelStringB = $channelObjectB['ObjectIdent'];
+                    $channelStringW = $channelObjectW['ObjectIdent'];
+
+                    $channelNumberR = $this->getIntFromString($channelStringR);
+                    $channelNumberG = $this->getIntFromString($channelStringG);
+                    $channelNumberB = $this->getIntFromString($channelStringB);
+                    $channelNumberW = $this->getIntFromString($channelStringW);
+                    DMX_FadeChannel($getDevice, $channelStringR, $getValueGlobalR, $getValueGlobalF);
+                    DMX_FadeChannel($getDevice, $channelStringG, $getValueGlobalG, $getValueGlobalF);
+                    DMX_FadeChannel($getDevice, $channelStringB, $getValueGlobalB, $getValueGlobalF);
+                    DMX_FadeChannel($getDevice, $channelStringW, $getValueGlobalW, $getValueGlobalF);
                 }
-            } */
+            } 
+
             echo "Event Trigger started";
         }
 
@@ -292,22 +321,23 @@
            return $eid;                       			
        }
 
-       protected function CreateEventTrigger($deviceList, $triggerID){
-           $Instance = $this->InstanceID;
-           // 0 = ausgelöstes; 1 = zyklisches; 2 = Wochenplan;
-           $eid = IPS_CreateEvent(0);
-           // Set Parent
-           IPS_SetParent($eid, $Instance);
-           // Set Name
-		   IPS_SetName($eid, "TriggerOnChange".$triggerID);
-           IPS_SetIdent($eid, "TriggerOnChange".$triggerID);
-           // Set Script 
-           IPS_SetEventScript($eid, "DMXDYN_eventTriggerOnChange(". $Instance .", ". $deviceList .");");
-           // OnUpdate für Variable 12345
-           IPS_SetEventTrigger($eid, 0, $triggerID);            
-           IPS_SetEventActive($eid, true);
+       protected function CreateEventTrigger($triggerID){
+            $Instance = $this->InstanceID;
 
-           return $eid;          
+            // 0 = ausgelöstes; 1 = zyklisches; 2 = Wochenplan;
+            $eid = IPS_CreateEvent(0);
+            // Set Parent
+            IPS_SetParent($eid, $Instance);
+            // Set Name
+            IPS_SetName($eid, "TriggerOnChange".$triggerID);
+            IPS_SetIdent($eid, "TriggerOnChange".$triggerID);
+            // Set Script            
+            IPS_SetEventScript($eid, "DMXDYN_eventTriggerOnChange(". $Instance .");");
+            // OnUpdate für Variable 12345
+            IPS_SetEventTrigger($eid, 0, $triggerID);            
+            IPS_SetEventActive($eid, true);
+
+            return $eid;          
        }
 
         // Own Function
