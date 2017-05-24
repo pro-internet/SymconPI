@@ -94,8 +94,8 @@
                         $insID = IPS_GetObjectIDByIdent("device$i", IPS_GetParent($this->InstanceID));
                     }
 
-                    //IPS_SetName($insID, $list->Name);
-                    IPS_SetName(" ");
+                    IPS_SetName($insID, $list->Name);
+                    //IPS_SetName(" ");
                     IPS_SetPosition($insID, $i + 1);
                     IPS_SetIdent($insID, "device$i");
 
@@ -156,9 +156,49 @@
                     }
                 }
             }
+            $Test = IPS_GetVariableIDByName("Global R", $parent);
+            $isEmpty = @IPS_GetObjectIDByIdent("TriggerOnChange".$Test, $parent);
+            if(empty($isEmpty)){
+                $triggerR = IPS_GetVariableIDByName("Global R", $parent);
+                $triggerG = IPS_GetVariableIDByName("Global G", $parent);
+                $triggerB = IPS_GetVariableIDByName("Global B", $parent);
+                $triggerW = IPS_GetVariableIDByName("Global W", $parent);
+
+                $vid = $this->CreateEventTrigger($deviceList, $triggerR);
+                $vid = $this->CreateEventTrigger($deviceList, $triggerG);
+                $vid = $this->CreateEventTrigger($deviceList, $triggerB);
+                $vid = $this->CreateEventTrigger($deviceList, $triggerW);
+            }
+        }
 
 
+        public function eventTriggerOnChange($deviceList){
+            /*
+            $parent = $this->InstanceID;
 
+            // Get Global ID`s
+            $getGlobalR = IPS_GetVariableIDByName("Global R", $parent);
+            $getGlobalG = IPS_GetVariableIDByName("Global G", $parent);
+            $getGlobalB = IPS_GetVariableIDByName("Global B", $parent);
+            $getGlobalW = IPS_GetVariableIDByName("Global W", $parent);
+            $getGlobalF = IPS_GetVariableIDByName("Global Fade", $parent);
+
+            // Get Global Values
+            $getValueGlobalR = GetValue($getGlobalR);
+            $getValueGlobalG = GetValue($getGlobalG);
+            $getValueGlobalB = GetValue($getGlobalB);
+            $getValueGlobalW = GetValue($getGlobalW);
+            $getValueGlobalF = GetValue($getGlobalF);
+
+            if (is_array($deviceList) || is_object($deviceList)){
+                foreach($deviceList as $i => $list){
+
+                    // Set Value for each Device and if the Switch set on
+                    $id = IPS_GetObjectIDByIdent("device$i", IPS_GetParent($this->InstanceID));
+                    print_r($id);
+                }
+            } */
+            echo "Event Trigger started";
         }
 
         public function Destroy() {
@@ -249,6 +289,17 @@
            IPS_SetEventTrigger($eid, 0, $triggerID);            
            IPS_SetEventActive($eid, true);
            return $eid;                       			
+       }
+
+       protected function CreateEventTrigger($deviceList, $triggerID){
+            $eid = IPS_CreateEvent(0);
+            $Instance = $this->InstanceID;
+			IPS_SetParent($eid, $this->InstanceID);
+			IPS_SetName($eid, "TriggerOnChange".$triggerID);
+			IPS_SetIdent($eid, "TriggerOnChange".$triggerID);
+			IPS_SetEventTrigger($eid, 1, $triggerID);
+			IPS_SetEventScript($eid, "DMXDYN_eventTriggerOnChange(". $Instance .", ". $deviceList .");");
+			IPS_SetEventActive($eid, true);
        }
 
         // Own Function
