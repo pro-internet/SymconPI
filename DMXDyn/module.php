@@ -19,6 +19,7 @@
             $parent = $this->InstanceID;
 
             // Create Instance Profies
+            // CreateProfile($profile, $type, $min, $max, $steps, $digits = 0, $prefix = "DMX", $suffix = "", $icon = "")
             if(!IPS_VariableProfileExists("DMX.Dim")){
 			    $this->CreateProfile("DMX.Dim", 1, 0, 255, 1, 1, "", "%");
 		    }
@@ -51,11 +52,11 @@
 
             // Create Instance Vars (RGBW & FadeWert)
             // CreateVariable($type, $name, $ident, $parent, $position, $initVal, $profile, $action, $hide)
-            $vid = $this->CreateVariable(1,"Global R","VarID_RWert", $parent, 0, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(1,"Global G","VarID_GWert", $parent, 1, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(1,"Global B","VarID_BWert", $parent, 2, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(1,"Global W","VarID_WWert", $parent, 3, 0, "DMX.Dim", $svs, false);
-            $vid = $this->CreateVariable(2, "Global Fade","VarID_FadeWert", $parent, 4, 1, "DMX.Fade", $svs, false);
+            $vid = $this->CreateVariable(1,"Global R","VarID_RWert", $parent, 1, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global G","VarID_GWert", $parent, 2, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global B","VarID_BWert", $parent, 3, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(1,"Global W","VarID_WWert", $parent, 4, 0, "DMX.Dim", $svs, false);
+            $vid = $this->CreateVariable(2, "Global Fade","VarID_FadeWert", $parent, 5, 1, "DMX.Fade", $svs, false);
 
             // Set Trigger Events on Vars
             
@@ -292,14 +293,21 @@
        }
 
        protected function CreateEventTrigger($deviceList, $triggerID){
-            $eid = IPS_CreateEvent(0);
-            $Instance = $this->InstanceID;
-			IPS_SetParent($eid, $this->InstanceID);
-			IPS_SetName($eid, "TriggerOnChange".$triggerID);
-			IPS_SetIdent($eid, "TriggerOnChange".$triggerID);
-			IPS_SetEventTrigger($eid, 1, $triggerID);
-			IPS_SetEventScript($eid, "DMXDYN_eventTriggerOnChange(". $Instance .", ". $deviceList .");");
-			IPS_SetEventActive($eid, true);
+           $Instance = $this->InstanceID;
+           // 0 = ausgelöstes; 1 = zyklisches; 2 = Wochenplan;
+           $eid = IPS_CreateEvent(0);
+           // Set Parent
+           IPS_SetParent($eid, $Instance);
+           // Set Name
+		   IPS_SetName($eid, "TriggerOnChange".$triggerID);
+           IPS_SetIdent($eid, "TriggerOnChange".$triggerID);
+           // Set Script 
+           IPS_SetEventScript($eid, "DMXDYN_eventTriggerOnChange(". $Instance .", ". $deviceList .");");
+           // OnUpdate für Variable 12345
+           IPS_SetEventTrigger($eid, 0, $triggerID);            
+           IPS_SetEventActive($eid, true);
+
+           return $eid;          
        }
 
         // Own Function
