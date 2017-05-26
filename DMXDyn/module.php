@@ -1,6 +1,6 @@
 <?
     // Klassendefinition
-    class DMXDYN extends IPSModule {
+    class DMXRGBW extends IPSModule {
         
         // Constructor
         public function __construct($InstanceID) {
@@ -15,7 +15,8 @@
             if(@$this->RegisterPropertyString("Lichter") !== false){
                 $this->RegisterPropertyString("Lichter","");
             }
-            
+        
+
             $parent = $this->InstanceID;
 
             // Create Instance Profies
@@ -177,11 +178,12 @@
 
             
             $parent = IPS_GetParent($InstanceID);
-            print_r($parent);
+            $fatherParent = IPS_GetParent($parent);
 
             $object = IPS_GetObject($parent);
-            print_r($object);
-            //$deviceList = json_decode($object->ReadPropertyString("Lichter"));
+            
+            $getList =  IPS_GetProperty($parent, "Lichter");
+            $deviceList = json_decode($getList);
 
             // Get Global ID`s
             $getGlobalR = IPS_GetVariableIDByName("Global R", $parent);
@@ -201,40 +203,56 @@
             if (is_array($deviceList) || is_object($deviceList)){
                 foreach($deviceList as $i => $device){
                     // Set Value for each Device and if the Switch set on
-                    print_r($device->RChannel);
-                    echo "\n";
+
+                    $channelName = $device->Name;
+                    //$ObjectID = @IPS_GetObjectIDByName($channelName, $parent);
+                    //$Object = IPS_GetObject($ObjectID);
+                    $ObjektID = @IPS_GetObjectIDByName($device->Name, $fatherParent);
+
+                    $deviceProp = IPS_GetObject($ObjektID);
+
+                    $getSwitch = $deviceProp['ChildrenIDs'][4];
+                    $Switch = GetValue($getSwitch);
+
+                    $getDevice = IPS_GetParent($device->RChannel);
 
                     $getValueChannelR = GetValue($device->RChannel);
                     $getValueChannelG = GetValue($device->GChannel);
                     $getValueChannelB = GetValue($device->BChannel);
                     $getValueChannelW = GetValue($device->WChannel);
-                    $getDevice        = IPS_GetParent($getValueChannelR);
 
                     // Get Ident 
-                    $channelObjectR = IPS_GetObject($getValueChannelR);
-                    $channelObjectG = IPS_GetObject($getValueChannelG);
-                    $channelObjectB = IPS_GetObject($getValueChannelB);
-                    $channelObjectW = IPS_GetObject($getValueChannelW);
-
+                    $channelObjectR = IPS_GetObject($device->RChannel);
+                    $channelObjectG = IPS_GetObject($device->GChannel);
+                    $channelObjectB = IPS_GetObject($device->BChannel);
+                    $channelObjectW = IPS_GetObject($device->WChannel);
+                   
                     // Get Channel Number
                     $channelStringR = $channelObjectR['ObjectIdent'];
                     $channelStringG = $channelObjectG['ObjectIdent'];
                     $channelStringB = $channelObjectB['ObjectIdent'];
                     $channelStringW = $channelObjectW['ObjectIdent'];
-
+                    
+                    
                     $channelNumberR = $this->getIntFromString($channelStringR);
                     $channelNumberG = $this->getIntFromString($channelStringG);
                     $channelNumberB = $this->getIntFromString($channelStringB);
                     $channelNumberW = $this->getIntFromString($channelStringW);
 
-                    DMX_FadeChannel($getDevice, $channelNumberR, $getValueGlobalR, $getValueGlobalF);
-                    DMX_FadeChannel($getDevice, $channelNumberG, $getValueGlobalG, $getValueGlobalF);
-                    DMX_FadeChannel($getDevice, $channelNumberB, $getValueGlobalB, $getValueGlobalF);
-                    DMX_FadeChannel($getDevice, $channelNumberW, $getValueGlobalW, $getValueGlobalF);
+                    if($Switch == TRUE){
+                        DMX_FadeChannel($getDevice, $channelNumberR, $getValueGlobalR, $getValueGlobalF);
+                        DMX_FadeChannel($getDevice, $channelNumberG, $getValueGlobalG, $getValueGlobalF);
+                        DMX_FadeChannel($getDevice, $channelNumberB, $getValueGlobalB, $getValueGlobalF);
+                        DMX_FadeChannel($getDevice, $channelNumberW, $getValueGlobalW, $getValueGlobalF);
+                    }
+                    if($Switch == FALSE){
+
+                    }
+
                 }
             } 
 
-            echo "Event Trigger started";
+            echo "\n Event Trigger started";
         }
 
         public function Destroy() {
