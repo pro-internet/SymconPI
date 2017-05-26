@@ -1,6 +1,6 @@
 <?
     // Klassendefinition
-    class DMXRGBW extends IPSModule {
+    class LichtsteuerungRGBW extends IPSModule {
         
         // Constructor
         public function __construct($InstanceID) {
