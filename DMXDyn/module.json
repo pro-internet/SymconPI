@@ -1,10 +1,10 @@
 {
     "id": "{ab3993a8-fb11-4dfc-b240-79995dae471b}",
-    "name": "DMXDYN",
+    "name": "DMXRGBW",
     "type": 3,
     "vendor": "prointernet",
     "aliases": [
-        "DMXDYN"
+        "DMXRGBW"
     ],
     "parentRequirements": [],
     "childRequirements": [],

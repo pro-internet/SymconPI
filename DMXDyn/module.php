@@ -174,9 +174,14 @@
 
 
         public function eventTriggerOnChange($InstanceID){
+
             
-            $parent = $InstanceID;
-            $deviceList = json_decode($this->ReadPropertyString("Lichter"));
+            $parent = IPS_GetParent($InstanceID);
+            print_r($parent);
+
+            $object = IPS_GetObject($parent);
+            print_r($object);
+            //$deviceList = json_decode($object->ReadPropertyString("Lichter"));
 
             // Get Global ID`s
             $getGlobalR = IPS_GetVariableIDByName("Global R", $parent);
@@ -221,10 +226,11 @@
                     $channelNumberG = $this->getIntFromString($channelStringG);
                     $channelNumberB = $this->getIntFromString($channelStringB);
                     $channelNumberW = $this->getIntFromString($channelStringW);
-                    DMX_FadeChannel($getDevice, $channelStringR, $getValueGlobalR, $getValueGlobalF);
-                    DMX_FadeChannel($getDevice, $channelStringG, $getValueGlobalG, $getValueGlobalF);
-                    DMX_FadeChannel($getDevice, $channelStringB, $getValueGlobalB, $getValueGlobalF);
-                    DMX_FadeChannel($getDevice, $channelStringW, $getValueGlobalW, $getValueGlobalF);
+
+                    DMX_FadeChannel($getDevice, $channelNumberR, $getValueGlobalR, $getValueGlobalF);
+                    DMX_FadeChannel($getDevice, $channelNumberG, $getValueGlobalG, $getValueGlobalF);
+                    DMX_FadeChannel($getDevice, $channelNumberB, $getValueGlobalB, $getValueGlobalF);
+                    DMX_FadeChannel($getDevice, $channelNumberW, $getValueGlobalW, $getValueGlobalF);
                 }
             } 
 
@@ -332,7 +338,7 @@
             IPS_SetName($eid, "TriggerOnChange".$triggerID);
             IPS_SetIdent($eid, "TriggerOnChange".$triggerID);
             // Set Script            
-            IPS_SetEventScript($eid, "DMXDYN_eventTriggerOnChange(". $Instance .");");
+            IPS_SetEventScript($eid, "DMXDYN_eventTriggerOnChange(". $Instance .", ". $triggerID .");");
             // OnUpdate für Variable 12345
             IPS_SetEventTrigger($eid, 0, $triggerID);            
             IPS_SetEventActive($eid, true);
