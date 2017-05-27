@@ -164,7 +164,7 @@ else
 	IPS_SetIdent($vid, "TimerEvent");
 	
 	IPS_SetPosition($vid, 3);
-	IPS_SetEventCyclicTimeBounds($vid,time() + GetValue($svid)*60,time() + GetValue($svid)*60);
+	IPS_SetEventCyclicTimeBounds($vid,time() + GetValue($svid)*60 + 1,time() + GetValue($svid)*60 + 1);
 	IPS_SetEventActive($vid,true);
 	IPS_SetEventScript($vid,"<?
 	
@@ -176,8 +176,8 @@ IPS_Sleep(100);
 if(@IPS_GetObjectIDByIdent(\"Scene\".\$x, '. $this->InstanceID .') !== false)
 {
 	\$data = wddx_deserialize(GetValue(IPS_GetObjectIDByIdent(\"Scene\".\$x.\"Data\", '. $this->InstanceID .')));
-		
-		if(\$data != NULL) {
+	\$timerTime = GetValue(IPS_GetObjectIDByIdent(\"Timer\".\$x, '. $this->InstanceID .'));
+		if(\$data != NULL && \$timerTime != 0) {
 			foreach(\$data as \$id => \$value) {
 				if (IPS_VariableExists(\$id)){
 					\$o = IPS_GetObject(\$id);
@@ -189,7 +189,10 @@ if(@IPS_GetObjectIDByIdent(\"Scene\".\$x, '. $this->InstanceID .') !== false)
 					
 					//Skip this device if we do not have a proper id
 					if(\$actionID < 10000)
+					{
+						SetValue(\$id,\$value);
 						continue;
+					}
 					
 					if(IPS_InstanceExists(\$actionID)) {
 						IPS_RequestAction(\$actionID, \$o[\"ObjectIdent\"], \$value);
@@ -212,8 +215,9 @@ else if(\$loop == 1)
 {
 	
 	\$data = wddx_deserialize(GetValue(IPS_GetObjectIDByIdent(\"Scene1Data\", '. $this->InstanceID .')));
+	\$timerTime = GetValue(IPS_GetObjectIDByIdent(\"Timer1\", '. $this->InstanceID .'));
 		
-		if(\$data != NULL) {
+		if(\$data != NULL && \$timerTime != 0) {
 			foreach(\$data as \$id => \$value) {
 				if (IPS_VariableExists(\$id)){
 					\$o = IPS_GetObject(\$id);
@@ -225,8 +229,11 @@ else if(\$loop == 1)
 					
 					//Skip this device if we do not have a proper id
 					if(\$actionID < 10000)
+					{
+						SetValue(\$id,\$value);
 						continue;
-					
+					}
+						
 					if(IPS_InstanceExists(\$actionID)) {
 						IPS_RequestAction(\$actionID, \$o[\"ObjectIdent\"], \$value);
 					} else if(IPS_ScriptExists(\$actionID)) {
@@ -301,8 +308,8 @@ else
 	
 	//event run first scene
 	$data = wddx_deserialize(GetValue(IPS_GetObjectIDByIdent("Scene1Data", '. $this->InstanceID .')));
-		
-		if($data != NULL) {
+	$timerTime = GetValue(IPS_GetObjectIDByIdent("Timer1", '. $this->InstanceID .'));
+		if($data != NULL && $timerTime != 0) {
 			foreach($data as $id => $value) {
 				if (IPS_VariableExists($id)){
 					$o = IPS_GetObject($id);
@@ -314,7 +321,10 @@ else
 					
 					//Skip this device if we do not have a proper id
 					if($actionID < 10000)
+					{
+						SetValue($id,$value);
 						continue;
+					}
 					
 					if(IPS_InstanceExists($actionID)) {
 						IPS_RequestAction($actionID, $o["ObjectIdent"], $value);
