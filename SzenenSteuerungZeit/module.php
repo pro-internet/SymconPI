@@ -89,6 +89,7 @@ if (\$IPS_SENDER == \"WebFront\")
 $association = IPS_GetVariableProfile("SZS.StartStopButton")["Associations"]; 
 if($association[0]["Name"] == "Stop")
 {	
+	//Change Caption of the Button
 	IPS_SetVariableProfileAssociation("SZS.StartStopButton", 1, "Start", "", -1);
 	
 	$targetIDs = IPS_GetObjectIDByIdent("Targets", '. $this->InstanceID .');
