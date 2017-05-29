@@ -637,7 +637,7 @@ if (\$IPS_SENDER == \"WebFront\")
 		
         public function refreshStatus() 
 		{
-			if(IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID) !== false)
+			if(@IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID) !== false)
 			{
 				$dtid = IPS_GetObjectIDByIdent("DelayTimer", $this->InstanceID);
 				IPS_SetEventActive($dtid,false);
@@ -653,8 +653,8 @@ if (\$IPS_SENDER == \"WebFront\")
 				$sid2 = $this->ReadPropertyInteger("Sensor2");
 				$sid3 =$this->ReadPropertyInteger("Sensor3");
 				$lid = IPS_GetObjectIDByIdent("limit", $this->InstanceID);
-				$lid2 = IPS_GetObjectIDByIdent("limit2", $this->InstanceID);
-				$lid3 = IPS_GetObjectIDByIdent("limit3", $this->InstanceID);
+				$lid2 = @IPS_GetObjectIDByIdent("limit2", $this->InstanceID);
+				$lid3 = @IPS_GetObjectIDByIdent("limit3", $this->InstanceID);
 				$statusID = IPS_GetObjectIDByIdent("Status", $this->InstanceID);
 				$ntID = IPS_GetObjectIDByIdent("NachlaufzeitVariable", $this->InstanceID);
 				
