@@ -379,7 +379,7 @@ IPS_SetEventActive($vid, true);
 				IPS_SetHidden($vid, true);				
 			}
 		}
-		//Delete excessive Scences		
+		//Delete excessive Scences		 
 		if($this->ReadPropertyBoolean("CycleThrough"))
 		{
 			$ChildrenIDsCount = (sizeof(IPS_GetChildrenIDs($this->InstanceID))-3)/3;
