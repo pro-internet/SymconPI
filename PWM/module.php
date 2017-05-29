@@ -192,7 +192,7 @@ if (\$IPS_SENDER == \"WebFront\")
 		}
 		
 		//Minimale Öffnungszeit refresh event
-		if(@IPS_GetObjectIDByIdent("MiniOeffnungEvent",$this->InstanceID) === false)
+		if(@IPS_GetObjectIDByIdent("MiniOeffnungOnChange",$this->InstanceID) === false)
 		{
 			$eid = IPS_CreateEvent(0);
 			IPS_SetParent($eid, $this->InstanceID);
